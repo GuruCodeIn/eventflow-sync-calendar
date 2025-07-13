@@ -25,10 +25,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     if (user) {
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+      const token = localStorage.getItem('token');
+      
+      // Don't try to connect if using mock token or no backend
+      if (token?.startsWith('mock-jwt-token-')) {
+        console.warn('Using mock authentication, skipping socket connection');
+        return;
+      }
+
+      const newSocket = io(import.meta.env.VITE_API_URL || 'https://your-backend-api.com', {
         auth: {
-          token: localStorage.getItem('token')
-        }
+          token
+        },
+        timeout: 5000,
+        forceNew: true
       });
 
       newSocket.on('connect', () => {
@@ -38,6 +48,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       newSocket.on('disconnect', () => {
         console.log('Disconnected from server');
+        setConnected(false);
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.warn('Socket connection failed:', error.message);
         setConnected(false);
       });
 
