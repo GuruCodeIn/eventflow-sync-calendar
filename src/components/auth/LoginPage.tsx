@@ -16,11 +16,14 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log('Login attempt for:', email);
+
     try {
       await login(email, password);
       toast.success('Welcome back!');
       navigate('/');
     } catch (error) {
+      console.error('Login error:', error);
       toast.error(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setLoading(false);
@@ -78,7 +81,7 @@ const LoginPage = () => {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                'Sign In'
+                'Log In'
               )}
             </button>
           </form>

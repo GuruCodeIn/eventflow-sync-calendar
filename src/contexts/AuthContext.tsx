@@ -32,32 +32,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      getCurrentUser()
-        .then(setUser)
-        .catch(() => {
+    const initializeAuth = async () => {
+      console.log('Initializing auth...');
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        console.log('Found token, getting current user');
+        try {
+          const currentUser = await getCurrentUser();
+          console.log('Successfully retrieved current user:', currentUser);
+          setUser(currentUser);
+        } catch (error) {
+          console.error('Failed to get current user:', error);
           localStorage.removeItem('token');
-        })
-        .finally(() => setLoading(false));
-    } else {
+        }
+      } else {
+        console.log('No token found');
+      }
+      
       setLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await loginUser(email, password);
-    localStorage.setItem('token', response.token);
-    setUser(response.user);
+    console.log('AuthContext login called for:', email);
+    try {
+      const response = await loginUser(email, password);
+      console.log('Login successful, storing token and user');
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Login failed in AuthContext:', error);
+      throw error;
+    }
   };
 
   const signup = async (name: string, email: string, password: string) => {
-    const response = await signupUser(name, email, password);
-    localStorage.setItem('token', response.token);
-    setUser(response.user);
+    console.log('AuthContext signup called for:', name, email);
+    try {
+      const response = await signupUser(name, email, password);
+      console.log('Signup successful, storing token and user');
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Signup failed in AuthContext:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
+    console.log('Logging out user');
     localStorage.removeItem('token');
     setUser(null);
   };

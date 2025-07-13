@@ -17,6 +17,8 @@ const SignupPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Signup attempt for:', name, email);
+    
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -29,6 +31,7 @@ const SignupPage = () => {
       toast.success('Account created successfully!');
       navigate('/');
     } catch (error) {
+      console.error('Signup error:', error);
       toast.error(error instanceof Error ? error.message : 'Signup failed');
     } finally {
       setLoading(false);
@@ -116,7 +119,7 @@ const SignupPage = () => {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                'Create Account'
+                'Sign Up'
               )}
             </button>
           </form>
@@ -128,7 +131,7 @@ const SignupPage = () => {
                 to="/login" 
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
               >
-                Sign in here
+                Log in here
               </Link>
             </p>
           </div>
