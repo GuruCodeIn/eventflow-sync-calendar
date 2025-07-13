@@ -1,73 +1,279 @@
-# Welcome to your Lovable project
 
-## Project info
+# 📅 Full-Stack Shared Calendar Application
 
-**URL**: https://lovable.dev/projects/ac8272b5-0c80-41b6-85da-c05b2b88c29a
+A modern, full-featured calendar application built with React, Node.js, and MongoDB. Features real-time collaboration, event sharing, and responsive design.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### Frontend
+- **Modern React UI** with TailwindCSS and smooth animations
+- **Multiple Calendar Views** (Month, Week, Day)
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Real-time Updates** with Socket.io
+- **Event Management** - Create, edit, delete, and share events
+- **User Authentication** with JWT
+- **Shared Calendars** with permission management
 
-**Use Lovable**
+### Backend
+- **RESTful API** built with Express.js
+- **MongoDB** database with Mongoose ODM
+- **JWT Authentication** with bcrypt password hashing
+- **Real-time Features** using Socket.io
+- **Input Validation** and error handling
+- **Rate Limiting** and security headers
+- **Docker Support** for easy deployment
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ac8272b5-0c80-41b6-85da-c05b2b88c29a) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React 18, TypeScript, TailwindCSS, Socket.io Client
+- **Backend**: Node.js, Express.js, MongoDB, Socket.io
+- **Authentication**: JWT, bcrypt
+- **Deployment**: Docker, Docker Compose
+- **Development**: Vite, ESLint, Prettier
 
-**Use your preferred IDE**
+## 🏗️ Project Structure
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+├── src/                    # React frontend
+│   ├── components/         # React components
+│   │   ├── auth/          # Authentication components
+│   │   ├── calendar/      # Calendar views
+│   │   ├── dashboard/     # Dashboard components
+│   │   ├── events/        # Event management
+│   │   ├── layout/        # Layout components
+│   │   └── shared/        # Shared calendar components
+│   ├── contexts/          # React contexts
+│   ├── api/              # API client functions
+│   └── pages/            # Main pages
+├── server/               # Node.js backend
+│   ├── src/
+│   │   ├── models/       # MongoDB models
+│   │   ├── routes/       # API routes
+│   │   ├── middleware/   # Custom middleware
+│   │   └── server.js     # Main server file
+│   └── package.json
+├── docker/               # Docker configuration
+├── docs/                 # Documentation
+└── docker-compose.yml    # Multi-container setup
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Quick Start
 
-Follow these steps:
+### Prerequisites
+- Node.js 16+ and npm
+- MongoDB (or use Docker)
+- Git
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd calendar-app
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 2. Environment Setup
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Backend Environment:**
+```bash
+cd server
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+**Frontend Environment:**
+```bash
+# In root directory
+echo "REACT_APP_API_URL=http://localhost:5000" > .env.local
+```
+
+### 3. Install Dependencies
+
+**Backend:**
+```bash
+cd server
+npm install
+```
+
+**Frontend:**
+```bash
+# In root directory
+npm install
+```
+
+### 4. Start Development Servers
+
+**Option A: Manual Start**
+```bash
+# Terminal 1: Start backend
+cd server
+npm run dev
+
+# Terminal 2: Start frontend
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Option B: Docker Compose**
+```bash
+docker-compose up --build
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 5. Access Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000/api
+- **API Health**: http://localhost:5000/api/health
 
-**Use GitHub Codespaces**
+## 📋 API Endpoints
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
+- `PUT /api/auth/profile` - Update profile
 
-## What technologies are used for this project?
+### Events
+- `GET /api/events` - Get user events
+- `POST /api/events` - Create new event
+- `GET /api/events/:id` - Get single event
+- `PUT /api/events/:id` - Update event
+- `DELETE /api/events/:id` - Delete event
+- `POST /api/events/:id/share` - Share event
 
-This project is built with:
+### Users
+- `GET /api/users/search` - Search users by email
+- `GET /api/users/profile` - Get user profile
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔧 Configuration
 
-## How can I deploy this project?
+### Environment Variables
 
-Simply open [Lovable](https://lovable.dev/projects/ac8272b5-0c80-41b6-85da-c05b2b88c29a) and click on Share -> Publish.
+**Backend (.env):**
+```env
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=mongodb://localhost:27017/calendar-app
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:3000
+```
 
-## Can I connect a custom domain to my Lovable project?
+**Frontend (.env.local):**
+```env
+REACT_APP_API_URL=http://localhost:5000
+```
 
-Yes, you can!
+## 🐳 Docker Deployment
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Development
+```bash
+docker-compose up --build
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Production
+```bash
+docker-compose -f docker-compose.prod.yml up --build
+```
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+cd server
+npm test
+```
+
+### Frontend Tests
+```bash
+npm test
+```
+
+## 📱 Features in Detail
+
+### Calendar Views
+- **Month View**: Traditional monthly calendar grid
+- **Week View**: 7-day week with hourly slots
+- **Day View**: Single day detailed view with hour blocks
+
+### Event Management
+- Create events with title, description, date/time, location
+- Color-coded events for easy organization
+- Recurring events support
+- Event sharing with permission levels (view/edit)
+
+### Real-time Features
+- Live event updates across all connected users
+- Real-time calendar synchronization
+- Instant notifications for shared events
+
+### User Experience
+- Responsive design for all screen sizes
+- Smooth animations and transitions
+- Intuitive drag-and-drop interface
+- Keyboard shortcuts for power users
+
+## 🔒 Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- Input validation and sanitization
+- CORS protection
+- Security headers with Helmet.js
+
+## 📈 Performance
+
+- Optimized database queries with indexes
+- Frontend code splitting and lazy loading
+- Image optimization and caching
+- Gzip compression
+- Connection pooling for database
+
+## 🚀 Deployment Options
+
+### Netlify (Frontend)
+1. Build the frontend: `npm run build`
+2. Deploy `dist` folder to Netlify
+3. Configure environment variables
+
+### Render/Fly.io (Backend)
+1. Push code to GitHub
+2. Connect to Render/Fly.io
+3. Configure environment variables
+4. Deploy with automatic builds
+
+### Self-Hosted
+- Use Docker Compose for full-stack deployment
+- Configure reverse proxy with Nginx
+- Set up SSL certificates
+- Monitor with logging and analytics
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: Check the `/docs` folder
+- **Issues**: Create GitHub issues for bugs
+- **Discussions**: Use GitHub discussions for questions
+
+## 🎯 Roadmap
+
+- [ ] Google Calendar integration
+- [ ] Mobile app (React Native)
+- [ ] Advanced recurring event patterns
+- [ ] Calendar import/export
+- [ ] Email notifications
+- [ ] Team workspace features
+- [ ] Advanced permissions system
+- [ ] Calendar themes and customization
+
+---
+
+**Built with ❤️ by the Calendar App Team**
