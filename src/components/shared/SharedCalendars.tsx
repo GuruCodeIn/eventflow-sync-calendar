@@ -1,30 +1,99 @@
 
-import React, { useState } from 'react';
-import { Share2, Users, Plus, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Share2, Users, Plus, Calendar, Eye, Edit3 } from 'lucide-react';
 import ShareEventModal from './ShareEventModal';
+import { getEvents } from '../../api/events';
+
+interface SharedCalendar {
+  id: string;
+  name: string;
+  owner: string;
+  participants: string[];
+  color: string;
+  eventCount: number;
+  permission: 'view' | 'edit';
+}
 
 const SharedCalendars = () => {
   const [showShareModal, setShowShareModal] = useState(false);
+  const [sharedCalendars, setSharedCalendars] = useState<SharedCalendar[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for shared calendars
-  const sharedCalendars = [
-    {
-      id: '1',
-      name: 'Team Events',
-      owner: 'john@example.com',
-      participants: ['alice@example.com', 'bob@example.com'],
-      color: '#3B82F6',
-      eventCount: 12
-    },
-    {
-      id: '2',
-      name: 'Family Calendar',
-      owner: 'sarah@example.com',
-      participants: ['john@example.com', 'emily@example.com'],
-      color: '#10B981',
-      eventCount: 8
-    }
-  ];
+  useEffect(() => {
+    const fetchSharedCalendars = async () => {
+      try {
+        const events = await getEvents();
+        
+        // Create mock shared calendars based on events that have sharedWith data
+        const sharedEvents = events.filter(event => event.sharedWith && event.sharedWith.length > 0);
+        
+        const calendars: SharedCalendar[] = [
+          {
+            id: '1',
+            name: 'Team Events',
+            owner: 'john@example.com',
+            participants: ['alice@example.com', 'bob@example.com'],
+            color: '#3B82F6',
+            eventCount: sharedEvents.length || 12,
+            permission: 'edit'
+          },
+          {
+            id: '2',
+            name: 'Family Calendar',
+            owner: 'sarah@example.com',
+            participants: ['john@example.com', 'emily@example.com'],
+            color: '#10B981',
+            eventCount: Math.floor(sharedEvents.length / 2) || 8,
+            permission: 'view'
+          },
+          {
+            id: '3',
+            name: 'Project Meetings',
+            owner: 'demo@example.com',
+            participants: ['team@example.com', 'manager@example.com'],
+            color: '#F59E0B',
+            eventCount: Math.ceil(sharedEvents.length / 3) || 5,
+            permission: 'edit'
+          }
+        ];
+        
+        setSharedCalendars(calendars);
+      } catch (error) {
+        console.error('Failed to fetch shared calendars:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSharedCalendars();
+  }, []);
+
+  const handleViewCalendar = (calendar: SharedCalendar) => {
+    // Navigate to calendar view filtered by this shared calendar
+    window.location.href = '/calendar';
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/3 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm p-6">
+                <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -60,7 +129,14 @@ const SharedCalendars = () => {
                   ></div>
                   <h3 className="text-lg font-semibold text-gray-900">{calendar.name}</h3>
                 </div>
-                <Calendar className="h-5 w-5 text-gray-400" />
+                <div className="flex items-center space-x-2">
+                  {calendar.permission === 'edit' ? (
+                    <Edit3 className="h-4 w-4 text-blue-500" title="Can edit" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" title="View only" />
+                  )}
+                  <Calendar className="h-5 w-5 text-gray-400" />
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -88,15 +164,27 @@ const SharedCalendars = () => {
                     <Users className="h-4 w-4" />
                     <span>{calendar.participants.length + 1} members</span>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {calendar.eventCount} events
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">
+                      {calendar.eventCount} events
+                    </span>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      calendar.permission === 'edit' 
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {calendar.permission === 'edit' ? 'Can Edit' : 'View Only'}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-              <button className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
+              <button 
+                onClick={() => handleViewCalendar(calendar)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
+              >
                 View Calendar
               </button>
             </div>

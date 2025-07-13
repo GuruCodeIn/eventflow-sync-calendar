@@ -11,6 +11,7 @@ import SignupPage from './components/auth/SignupPage';
 import Dashboard from './components/dashboard/Dashboard';
 import CalendarView from './components/calendar/CalendarView';
 import SharedCalendars from './components/shared/SharedCalendars';
+import ProfilePage from './components/profile/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Navbar from './components/layout/Navbar';
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,16 @@ const App = () => (
                       <Navbar />
                       <div className="flex-1 overflow-hidden">
                         <SharedCalendars />
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <div className="flex flex-col h-screen">
+                      <Navbar />
+                      <div className="flex-1 overflow-hidden">
+                        <ProfilePage />
                       </div>
                     </div>
                   </ProtectedRoute>

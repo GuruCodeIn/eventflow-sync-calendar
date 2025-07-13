@@ -33,10 +33,15 @@ const QuickStats = () => {
           return eventDate >= today && eventDate < tomorrow;
         });
 
+        // Count shared events (events that have sharedWith data)
+        const sharedEventsCount = events.filter(event => 
+          event.sharedWith && event.sharedWith.length > 0
+        ).length;
+
         setStats({
           totalEvents: events.length,
           upcomingEvents: upcomingEvents.length,
-          sharedCalendars: 2, // Mock data
+          sharedCalendars: sharedEventsCount > 0 ? 3 : 0, // Mock shared calendar count
           todayEvents: todayEvents.length
         });
       } catch (error) {
@@ -98,7 +103,7 @@ const QuickStats = () => {
       {statItems.map((item, index) => (
         <div 
           key={item.title}
-          className={`bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 ${item.bgColor} bg-opacity-20`}
+          className={`bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 ${item.bgColor} bg-opacity-20 cursor-pointer`}
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <div className="flex items-center justify-between">

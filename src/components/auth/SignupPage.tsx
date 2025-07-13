@@ -28,8 +28,8 @@ const SignupPage = () => {
 
     try {
       await signup(name, email, password);
-      toast.success('Account created successfully!');
-      navigate('/');
+      toast.success('Account created successfully! Please log in.');
+      navigate('/login');
     } catch (error) {
       console.error('Signup error:', error);
       toast.error(error instanceof Error ? error.message : 'Signup failed');

@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<{ requiresLogin: boolean }>;
   logout: () => void;
   loading: boolean;
 }
@@ -73,9 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('AuthContext signup called for:', name, email);
     try {
       const response = await signupUser(name, email, password);
-      console.log('Signup successful, storing token and user');
-      localStorage.setItem('token', response.token);
-      setUser(response.user);
+      console.log('Signup successful, but not auto-logging in');
+      // Don't auto-login after signup, let user login manually
+      return { requiresLogin: true };
     } catch (error) {
       console.error('Signup failed in AuthContext:', error);
       throw error;
