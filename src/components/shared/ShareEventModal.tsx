@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { X, Mail, UserPlus, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { shareEvent, getEvents } from '@/api/events';
+import { sendEventShareEmail } from '@/services/emailService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ShareEventModalProps {
   onClose: () => void;
@@ -12,18 +15,54 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState<'view' | 'edit'>('view');
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim()) {
+      toast.error('Please enter an email address');
+      return;
+    }
+
+    if (!user) {
+      toast.error('You must be logged in to share events');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Calendar shared with ${email}!`);
+      if (eventId) {
+        // Share the event via API
+        await shareEvent(eventId, email, permission);
+        
+        // Get event details for email
+        const events = await getEvents();
+        const eventToShare = events.find(event => event._id === eventId);
+        
+        if (eventToShare) {
+          // Send email notification
+          await sendEventShareEmail(
+            {
+              title: eventToShare.title,
+              start: eventToShare.start,
+              end: eventToShare.end,
+              location: eventToShare.location
+            },
+            email,
+            user.email,
+            user.name,
+            permission
+          );
+        }
+      }
+      
+      toast.success('Event shared successfully! Email notification sent.');
       onClose();
     } catch (error) {
-      toast.error('Failed to share calendar');
+      console.error('Error sharing event:', error);
+      toast.error('Failed to share event or send email notification');
     } finally {
       setLoading(false);
     }

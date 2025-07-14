@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Mail, Lock, User, Calendar, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { sendWelcomeEmail } from '@/services/emailService';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -28,6 +29,14 @@ const SignupPage = () => {
 
     try {
       await signup(name, email, password);
+      
+      // Send welcome email
+      try {
+        await sendWelcomeEmail(email, name);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+      
       toast.success('Account created successfully! Please log in.');
       navigate('/login');
     } catch (error) {
