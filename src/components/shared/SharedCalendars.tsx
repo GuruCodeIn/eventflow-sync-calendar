@@ -131,9 +131,9 @@ const SharedCalendars = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   {calendar.permission === 'edit' ? (
-                    <Edit3 className="h-4 w-4 text-blue-500" title="Can edit" />
+                    <Edit3 className="h-4 w-4 text-blue-500" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" title="View only" />
+                    <Eye className="h-4 w-4 text-gray-400" />
                   )}
                   <Calendar className="h-5 w-5 text-gray-400" />
                 </div>
