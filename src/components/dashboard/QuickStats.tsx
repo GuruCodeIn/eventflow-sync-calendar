@@ -88,8 +88,8 @@ const QuickStats = () => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl p-6 shadow-sm animate-pulse">
+        {['total', 'today', 'upcoming', 'shared'].map((type) => (
+          <div key={`loading-${type}`} className="bg-white rounded-xl p-6 shadow-sm animate-pulse">
             <div className="h-4 bg-gray-200 rounded mb-4"></div>
             <div className="h-8 bg-gray-200 rounded"></div>
           </div>
@@ -102,7 +102,7 @@ const QuickStats = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {statItems.map((item, index) => (
         <div 
-          key={item.title}
+          key={`stat-${item.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`}
           className={`bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 ${item.bgColor} bg-opacity-20 cursor-pointer`}
           style={{ animationDelay: `${index * 100}ms` }}
         >

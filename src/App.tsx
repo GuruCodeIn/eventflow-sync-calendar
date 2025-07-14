@@ -26,7 +26,7 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <SocketProvider>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 hide-scrollbar">
             <HotToaster position="top-right" />
             <BrowserRouter>
               <Routes>
@@ -75,6 +75,9 @@ const App = () => (
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
+              <Toaster />
+              <Sonner />
+              <HotToaster />
             </BrowserRouter>
           </div>
         </SocketProvider>

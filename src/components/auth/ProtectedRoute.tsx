@@ -24,6 +24,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
+    // Clear any invalid tokens and redirect to login
+    localStorage.removeItem('token');
     window.location.href = '/login';
     return null;
   }

@@ -54,10 +54,13 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex md:items-center md:space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-gray-700">
+            <Link 
+              to="/profile"
+              className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-100"
+            >
               <User className="h-4 w-4" />
               <span>{user?.name}</span>
-            </div>
+            </Link>
             <button
               onClick={handleLogout}
               className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -103,13 +106,17 @@ const Navbar = () => {
               ))}
             </div>
             <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="flex items-center px-4">
+              <Link 
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-200"
+              >
                 <User className="h-5 w-5 text-gray-400" />
                 <div className="ml-3">
                   <div className="text-base font-medium text-gray-800">{user?.name}</div>
                   <div className="text-sm font-medium text-gray-500">{user?.email}</div>
                 </div>
-              </div>
+              </Link>
               <div className="mt-3 space-y-1">
                 <button
                   onClick={handleLogout}

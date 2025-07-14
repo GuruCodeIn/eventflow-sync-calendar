@@ -51,8 +51,8 @@ const UpcomingEvents = () => {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Upcoming Events</h2>
         <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse">
+          {['upcoming-1', 'upcoming-2', 'upcoming-3'].map((id) => (
+            <div key={`loading-${id}`} className="animate-pulse">
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
               <div className="h-3 bg-gray-200 rounded w-2/3"></div>
             </div>
