@@ -35,12 +35,12 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <QuickStats key={refreshKey} />
-          <UpcomingEvents key={refreshKey} />
+          <QuickStats key={`stats-${refreshKey}`} />
+          <UpcomingEvents key={`upcoming-${refreshKey}`} />
         </div>
         
         <div className="space-y-6">
-          <RecentEvents key={refreshKey} />
+          <RecentEvents key={`recent-${refreshKey}`} />
         </div>
       </div>
 

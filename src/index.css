@@ -122,9 +122,20 @@ All colors MUST be HSL.
   html {
     scrollbar-width: none;
     -ms-overflow-style: none;
+    overflow-y: auto;
   }
   
   html::-webkit-scrollbar {
+    display: none;
+  }
+  
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overflow-y: auto;
+  }
+  
+  body::-webkit-scrollbar {
     display: none;
   }
 }

@@ -32,46 +32,46 @@ const App = () => (
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <div className="flex flex-col h-screen">
-                      <Navbar />
-                      <div className="flex-1 overflow-hidden">
-                        <Dashboard />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                } />
-                <Route path="/calendar" element={
-                  <ProtectedRoute>
-                    <div className="flex flex-col h-screen">
-                      <Navbar />
-                      <div className="flex-1 overflow-hidden">
-                        <CalendarView />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                } />
-                <Route path="/shared" element={
-                  <ProtectedRoute>
-                    <div className="flex flex-col h-screen">
-                      <Navbar />
-                      <div className="flex-1 overflow-hidden">
-                        <SharedCalendars />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <div className="flex flex-col h-screen">
-                      <Navbar />
-                      <div className="flex-1 overflow-hidden">
-                        <ProfilePage />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                } />
+                 <Route path="/" element={
+                   <ProtectedRoute>
+                     <div className="flex flex-col h-screen">
+                       <Navbar />
+                       <div className="flex-1 overflow-y-auto hide-scrollbar">
+                         <Dashboard />
+                       </div>
+                     </div>
+                   </ProtectedRoute>
+                 } />
+                 <Route path="/calendar" element={
+                   <ProtectedRoute>
+                     <div className="flex flex-col h-screen">
+                       <Navbar />
+                       <div className="flex-1 overflow-y-auto hide-scrollbar">
+                         <CalendarView />
+                       </div>
+                     </div>
+                   </ProtectedRoute>
+                 } />
+                 <Route path="/shared" element={
+                   <ProtectedRoute>
+                     <div className="flex flex-col h-screen">
+                       <Navbar />
+                       <div className="flex-1 overflow-y-auto hide-scrollbar">
+                         <SharedCalendars />
+                       </div>
+                     </div>
+                   </ProtectedRoute>
+                 } />
+                 <Route path="/profile" element={
+                   <ProtectedRoute>
+                     <div className="flex flex-col h-screen">
+                       <Navbar />
+                       <div className="flex-1 overflow-y-auto hide-scrollbar">
+                         <ProfilePage />
+                       </div>
+                     </div>
+                   </ProtectedRoute>
+                 } />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
