@@ -1,6 +1,5 @@
 
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -9,6 +8,11 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+// Import configuration and middleware
+const { connectDB } = require('./config/database');
+const { sanitizeInput } = require('./middleware/validation');
+const { healthCheck } = require('../healthcheck');
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
@@ -16,6 +20,15 @@ const userRoutes = require('./routes/users');
 
 // Import middleware
 const { authenticateToken } = require('./middleware/auth');
+
+// Environment validation
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+  process.exit(1);
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -32,11 +45,27 @@ const io = new Server(httpServer, {
 app.set('io', io);
 
 // Middleware
-app.use(helmet());
-app.use(morgan('combined'));
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
+}));
+
+// Trust proxy in production
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// CORS configuration
+const allowedOrigins = process.env.CLIENT_URL 
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+  : ["http://localhost:3000"];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate limiting
@@ -48,17 +77,10 @@ app.use('/api', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(sanitizeInput);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/calendar-app', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ Connected to MongoDB'))
-.catch((err) => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
-});
+connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -66,13 +88,8 @@ app.use('/api/events', authenticateToken, eventRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
+app.get('/api/health', healthCheck);
+app.get('/health', healthCheck);
 
 // Socket.io authentication middleware
 io.use((socket, next) => {
