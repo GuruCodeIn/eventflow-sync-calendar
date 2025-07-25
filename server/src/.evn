@@ -1,0 +1,4 @@
+PORT=5001
+MONGODB_URI=mongodb+srv://Guruprasad_H_M:Guru%402004@cluster0.sdiopyr.mongodb.net/calendar-app?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=your-super-secret
+CLIENT_URL=http://localhost:3000
