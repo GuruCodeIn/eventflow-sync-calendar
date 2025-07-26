@@ -51,8 +51,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         }
       }
       
-      toast.success(`Event created successfully! ${shareEmails.length > 0 ? `Shared with ${shareEmails.length} people.` : ''}`);
-      onEventCreated();
+      onEventCreated(); // Remove toast from here to avoid double messages
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create event');
     } finally {

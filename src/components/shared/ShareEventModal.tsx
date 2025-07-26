@@ -43,18 +43,23 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
         
         if (eventToShare) {
           // Send email notification
-          await sendEventShareEmail(
-            {
-              title: eventToShare.title,
-              start: eventToShare.start,
-              end: eventToShare.end,
-              location: eventToShare.location
-            },
-            email,
-            user.email,
-            user.name,
-            permission
-          );
+          try {
+            await sendEventShareEmail(
+              {
+                title: eventToShare.title,
+                start: eventToShare.start,
+                end: eventToShare.end,
+                location: eventToShare.location
+              },
+              email,
+              user.email,
+              user.name,
+              permission
+            );
+          } catch (emailError) {
+            console.error('Failed to send share email:', emailError);
+            // Continue without failing the whole operation
+          }
         }
       }
       

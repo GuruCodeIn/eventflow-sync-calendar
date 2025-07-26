@@ -83,8 +83,8 @@ export const sendWelcomeEmail = async (
 ): Promise<void> => {
   await sendEmail({
     to_email: userEmail,
-    from_email: 'noreply@calendarsystem.com',
-    from_name: 'Calendar System',
+    from_email: userEmail, // Use user's email as from_email
+    from_name: userName,
     subject: 'Welcome to Calendar System!',
     message: `Welcome ${userName}! Your account has been successfully created. You can now start managing your events and sharing calendars.`,
   });

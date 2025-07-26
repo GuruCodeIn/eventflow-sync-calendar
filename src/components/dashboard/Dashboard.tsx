@@ -13,6 +13,10 @@ const Dashboard = () => {
   const handleEventCreated = () => {
     setRefreshKey(prev => prev + 1);
     setShowEventModal(false);
+    // Show success message here to avoid duplicates
+    import('react-hot-toast').then(({ default: toast }) => {
+      toast.success('Event created successfully!');
+    });
   };
 
   return (
