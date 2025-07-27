@@ -1,19 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loginUser, signupUser, getCurrentUser } from '../api/auth';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'user' | 'admin';
-}
+import { supabase } from '../integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<{ requiresLogin: boolean }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -29,67 +24,95 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      console.log('Initializing auth...');
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        console.log('Found token, getting current user');
-        try {
-          const currentUser = await getCurrentUser();
-          console.log('Successfully retrieved current user:', currentUser);
-          setUser(currentUser);
-        } catch (error) {
-          console.error('Failed to get current user:', error);
-          localStorage.removeItem('token');
-        }
-      } else {
-        console.log('No token found');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
       }
-      
-      setLoading(false);
-    };
+    );
 
-    initializeAuth();
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.email);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    console.log('AuthContext login called for:', email);
-    try {
-      const response = await loginUser(email, password);
-      console.log('Login successful, storing token and user');
-      localStorage.setItem('token', response.token);
-      setUser(response.user);
-    } catch (error) {
-      console.error('Login failed in AuthContext:', error);
+    console.log('Logging in user:', email);
+    setLoading(true);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+    
+    if (error) {
+      console.error('Login failed:', error);
       throw error;
     }
+    
+    console.log('Login successful:', data.user?.email);
   };
 
   const signup = async (name: string, email: string, password: string) => {
-    console.log('AuthContext signup called for:', name, email);
-    try {
-      const response = await signupUser(name, email, password);
-      console.log('Signup successful, but not auto-logging in');
-      // Don't auto-login after signup, let user login manually
-      return { requiresLogin: true };
-    } catch (error) {
-      console.error('Signup failed in AuthContext:', error);
+    console.log('Signing up user:', email);
+    setLoading(true);
+    
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          name: name
+        }
+      }
+    });
+
+    setLoading(false);
+    
+    if (error) {
+      console.error('Signup failed:', error);
       throw error;
     }
+    
+    console.log('Signup successful for:', email);
+    return { requiresLogin: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log('Logging out user');
-    localStorage.removeItem('token');
-    setUser(null);
+    setLoading(true);
+    
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Logout failed:', error);
+    }
+    
+    setLoading(false);
+    console.log('Logout successful');
   };
 
   const value = {
     user,
+    session,
     login,
     signup,
     logout,

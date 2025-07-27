@@ -1,0 +1,153 @@
+import { supabase } from '../integrations/supabase/client';
+
+export interface Event {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  shared_with: any[];
+  created_at: string;
+}
+
+export const getEvents = async (): Promise<Event[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('start_time', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
+
+  return (data || []).map(event => ({
+    ...event,
+    shared_with: Array.isArray(event.shared_with) ? event.shared_with : []
+  }));
+};
+
+export const createEvent = async (event: Omit<Event, 'id' | 'user_id' | 'created_at'>): Promise<Event> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('events')
+    .insert([{
+      ...event,
+      user_id: user.id,
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating event:', error);
+    throw error;
+  }
+
+  return {
+    ...data,
+    shared_with: Array.isArray(data.shared_with) ? data.shared_with : []
+  };
+};
+
+export const updateEvent = async (id: string, event: Partial<Event>): Promise<Event> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('events')
+    .update(event)
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+
+  return {
+    ...data,
+    shared_with: Array.isArray(data.shared_with) ? data.shared_with : []
+  };
+};
+
+export const deleteEvent = async (id: string): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};
+
+export const shareEvent = async (eventId: string, userEmail: string): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  // First, get the target user by email
+  const { data: targetUser, error: userError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', userEmail)
+    .single();
+
+  if (userError || !targetUser) {
+    throw new Error('User not found');
+  }
+
+  // Get the current event
+  const { data: currentEvent, error: eventError } = await supabase
+    .from('events')
+    .select('shared_with')
+    .eq('id', eventId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (eventError || !currentEvent) {
+    throw new Error('Event not found or you do not have permission to share it');
+  }
+
+  // Add the user to shared_with array
+  const currentSharedWith = Array.isArray(currentEvent.shared_with) ? currentEvent.shared_with : [];
+  const updatedSharedWith = [...currentSharedWith, targetUser.id];
+
+  const { error: updateError } = await supabase
+    .from('events')
+    .update({ shared_with: updatedSharedWith })
+    .eq('id', eventId)
+    .eq('user_id', user.id);
+
+  if (updateError) {
+    console.error('Error sharing event:', updateError);
+    throw updateError;
+  }
+};

@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, TrendingUp } from 'lucide-react';
-import { getEvents } from '../../api/events';
+import { getEvents } from '../../api/events-supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Stats {
   totalEvents: number;
@@ -27,15 +28,15 @@ const QuickStats = () => {
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
-        const upcomingEvents = events.filter(event => new Date(event.start) > now);
+        const upcomingEvents = events.filter(event => new Date(event.start_time) > now);
         const todayEvents = events.filter(event => {
-          const eventDate = new Date(event.start);
+          const eventDate = new Date(event.start_time);
           return eventDate >= today && eventDate < tomorrow;
         });
 
-        // Count shared events (events that have sharedWith data)
+        // Count shared events (events that have shared_with data)
         const sharedEventsCount = events.filter(event => 
-          event.sharedWith && event.sharedWith.length > 0
+          event.shared_with && event.shared_with.length > 0
         ).length;
 
         setStats({
