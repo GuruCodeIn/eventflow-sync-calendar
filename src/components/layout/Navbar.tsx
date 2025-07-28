@@ -10,9 +10,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      navigate('/auth');
+    }
   };
 
   const navItems = [
@@ -59,7 +64,7 @@ const Navbar = () => {
               className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-100"
             >
               <User className="h-4 w-4" />
-              <span>{user?.name}</span>
+              <span>{user?.email?.split('@')[0] || 'User'}</span>
             </Link>
             <button
               onClick={handleLogout}
@@ -113,7 +118,7 @@ const Navbar = () => {
               >
                 <User className="h-5 w-5 text-gray-400" />
                 <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800">{user?.name}</div>
+                  <div className="text-base font-medium text-gray-800">{user?.email?.split('@')[0] || 'User'}</div>
                   <div className="text-sm font-medium text-gray-500">{user?.email}</div>
                 </div>
               </Link>

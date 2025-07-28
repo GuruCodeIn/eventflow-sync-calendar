@@ -1,16 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, MoreVertical } from 'lucide-react';
-import { getEvents } from '../../api/events';
+import { getEvents } from '../../api/events-supabase';
 import { format, isToday, isPast } from 'date-fns';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
-  start: string;
-  end: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 const RecentEvents = () => {
@@ -22,7 +24,7 @@ const RecentEvents = () => {
       try {
         const allEvents = await getEvents();
         const recent = allEvents
-          .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime())
+          .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
           .slice(0, 6);
         
         setEvents(recent);
@@ -37,8 +39,8 @@ const RecentEvents = () => {
   }, []);
 
   const getEventStatus = (event: Event) => {
-    const startDate = new Date(event.start);
-    const endDate = new Date(event.end);
+    const startDate = new Date(event.start_time);
+    const endDate = new Date(event.end_time);
     const now = new Date();
 
     if (now >= startDate && now <= endDate) {
@@ -83,19 +85,16 @@ const RecentEvents = () => {
       ) : (
         <div className="space-y-3">
           {events.map((event, index) => {
-            const startDate = new Date(event.start);
+            const startDate = new Date(event.start_time);
             const status = getEventStatus(event);
             
             return (
               <div 
-                key={event._id}
+                key={event.id}
                 className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 transform hover:scale-[1.02]"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div 
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: event.color }}
-                ></div>
+                <div className="w-2 h-2 rounded-full flex-shrink-0 bg-blue-500"></div>
                 
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-gray-900 truncate">

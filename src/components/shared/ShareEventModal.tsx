@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { X, Mail, UserPlus, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { shareEvent, getEvents } from '@/api/events';
+import { shareEvent, getEvents } from '@/api/events-supabase';
 import { sendEventShareEmail } from '@/services/emailService';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -35,11 +35,11 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
     try {
       if (eventId) {
         // Share the event via API
-        await shareEvent(eventId, email, permission);
+        await shareEvent(eventId, email);
         
         // Get event details for email
         const events = await getEvents();
-        const eventToShare = events.find(event => event._id === eventId);
+        const eventToShare = events.find(event => event.id === eventId);
         
         if (eventToShare) {
           // Send email notification
@@ -47,13 +47,13 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
             await sendEventShareEmail(
               {
                 title: eventToShare.title,
-                start: eventToShare.start,
-                end: eventToShare.end,
-                location: eventToShare.location
+                start: eventToShare.start_time,
+                end: eventToShare.end_time,
+                location: eventToShare.description || ''
               },
               email,
-              user.email,
-              user.name,
+              user.email || '',
+              user.email?.split('@')[0] || 'User',
               permission
             );
           } catch (emailError) {

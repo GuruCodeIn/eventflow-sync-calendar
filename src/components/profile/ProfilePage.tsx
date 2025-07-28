@@ -2,17 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Calendar, History, Settings, Save, Edit3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getEvents } from '../../api/events';
+import { getEvents, deleteEvent } from '../../api/events-supabase';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { sendPasswordChangeEmail } from '@/services/emailService';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
-  start: string;
-  end: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  description?: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 const ProfilePage = () => {
@@ -22,7 +25,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.email?.split('@')[0] || '',
     email: user?.email || '',
     currentPassword: '',
     newPassword: '',
@@ -72,7 +75,7 @@ const ProfilePage = () => {
       
       // Send password change notification email
       try {
-        await sendPasswordChangeEmail(user.email, user.name);
+        await sendPasswordChangeEmail(user.email, user.email?.split('@')[0] || 'User');
       } catch (emailError) {
         console.error('Failed to send password change email:', emailError);
       }
@@ -90,8 +93,21 @@ const ProfilePage = () => {
     { id: 'settings', name: 'Account Settings', icon: Settings }
   ];
 
-  const upcomingEvents = events.filter(event => new Date(event.start) > new Date());
-  const pastEvents = events.filter(event => new Date(event.start) <= new Date());
+  const upcomingEvents = events.filter(event => new Date(event.start_time) > new Date());
+  const pastEvents = events.filter(event => new Date(event.start_time) <= new Date());
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await deleteEvent(eventId);
+        setEvents(events.filter(event => event.id !== eventId));
+        toast.success('Event deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete event:', error);
+        toast.error('Failed to delete event');
+      }
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -212,24 +228,30 @@ const ProfilePage = () => {
                 ) : (
                   <div className="space-y-3">
                     {events.slice(0, 10).map((event) => (
-                      <div key={event._id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                        <div 
-                          className="w-4 h-4 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: event.color }}
-                        ></div>
+                      <div key={event.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 bg-blue-500"></div>
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900">{event.title}</h4>
                           <p className="text-sm text-gray-500">
-                            {format(new Date(event.start), 'MMM d, yyyy - h:mm a')}
+                            {format(new Date(event.start_time), 'MMM d, yyyy - h:mm a')}
                           </p>
+                          {event.description && (
+                            <p className="text-sm text-gray-400 truncate">{event.description}</p>
+                          )}
                         </div>
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          new Date(event.start) > new Date() 
+                          new Date(event.start_time) > new Date() 
                             ? 'bg-blue-100 text-blue-800' 
                             : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {new Date(event.start) > new Date() ? 'Upcoming' : 'Completed'}
+                          {new Date(event.start_time) > new Date() ? 'Upcoming' : 'Completed'}
                         </span>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
                       </div>
                     ))}
                   </div>

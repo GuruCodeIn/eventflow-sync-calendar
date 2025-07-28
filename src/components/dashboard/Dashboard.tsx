@@ -9,6 +9,7 @@ import UpcomingEvents from './UpcomingEvents';
 const Dashboard = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [key, setKey] = useState(0);
 
   const handleEventCreated = () => {
     setRefreshKey(prev => prev + 1);

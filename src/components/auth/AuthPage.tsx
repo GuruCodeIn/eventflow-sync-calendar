@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Loader2, Calendar, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 const AuthPage = () => {
   const { user, login, signup, loading } = useAuth();
@@ -22,6 +23,7 @@ const AuthPage = () => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // If user is already logged in, redirect to dashboard
   if (user && !loading) {
@@ -165,6 +167,15 @@ const AuthPage = () => {
                       'Sign In'
                     )}
                   </Button>
+                  <div className="text-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
                 </form>
               </TabsContent>
               
@@ -249,6 +260,13 @@ const AuthPage = () => {
             </Tabs>
           </CardContent>
         </Card>
+        
+        {showForgotPassword && (
+          <ForgotPasswordModal
+            onClose={() => setShowForgotPassword(false)}
+            onBackToLogin={() => setShowForgotPassword(false)}
+          />
+        )}
       </div>
     </div>
   );

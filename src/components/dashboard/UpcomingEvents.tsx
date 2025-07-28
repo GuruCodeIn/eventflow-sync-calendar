@@ -1,17 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
-import { getEvents } from '../../api/events';
+import { getEvents } from '../../api/events-supabase';
 import { format, isToday, isTomorrow, isThisWeek } from 'date-fns';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
-  start: string;
-  end: string;
-  location?: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 const UpcomingEvents = () => {
@@ -24,8 +25,8 @@ const UpcomingEvents = () => {
         const allEvents = await getEvents();
         const now = new Date();
         const upcoming = allEvents
-          .filter(event => new Date(event.start) > now)
-          .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+          .filter(event => new Date(event.start_time) > now)
+          .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
           .slice(0, 5);
         
         setEvents(upcoming);
@@ -77,19 +78,16 @@ const UpcomingEvents = () => {
       ) : (
         <div className="space-y-4">
           {events.map((event, index) => {
-            const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
+            const startDate = new Date(event.start_time);
+            const endDate = new Date(event.end_time);
             
             return (
               <div 
-                key={event._id}
+                key={event.id}
                 className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 transform hover:scale-[1.02]"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div 
-                  className="w-3 h-3 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: event.color }}
-                ></div>
+                <div className="w-3 h-3 rounded-full mt-2 flex-shrink-0 bg-blue-500"></div>
                 
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium text-gray-900 truncate">
@@ -101,13 +99,6 @@ const UpcomingEvents = () => {
                       <Clock className="h-3 w-3 mr-1" />
                       <span>{getDateLabel(startDate)} at {format(startDate, 'h:mm a')}</span>
                     </div>
-                    
-                    {event.location && (
-                      <div className="flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span className="truncate">{event.location}</span>
-                      </div>
-                    )}
                   </div>
                   
                   {event.description && (
