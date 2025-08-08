@@ -18,15 +18,21 @@ export const getEvents = async (): Promise<Event[]> => {
     throw new Error('User not authenticated');
   }
 
+  console.log('Fetching events for user:', user.id);
+
   const { data, error } = await supabase
     .from('events')
     .select('*')
+    .or(`user_id.eq.${user.id},shared_with.cs.["${user.id}"]`)
     .order('start_time', { ascending: true });
 
   if (error) {
     console.error('Error fetching events:', error);
     throw error;
   }
+
+  console.log('Fetched events:', data?.length || 0, 'events');
+  console.log('Events data:', data);
 
   return (data || []).map(event => ({
     ...event,
@@ -41,6 +47,9 @@ export const createEvent = async (event: Omit<Event, 'id' | 'user_id' | 'created
     throw new Error('User not authenticated');
   }
 
+  console.log('Creating event for user:', user.id);
+  console.log('Event data:', event);
+
   const { data, error } = await supabase
     .from('events')
     .insert([{
@@ -54,6 +63,8 @@ export const createEvent = async (event: Omit<Event, 'id' | 'user_id' | 'created
     console.error('Error creating event:', error);
     throw error;
   }
+
+  console.log('Created event:', data);
 
   return {
     ...data,
