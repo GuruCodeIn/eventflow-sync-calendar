@@ -15,7 +15,11 @@ interface Event {
   created_at: string;
 }
 
-const UpcomingEvents = () => {
+interface UpcomingEventsProps {
+  refreshKey?: number;
+}
+
+const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ refreshKey }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +42,7 @@ const UpcomingEvents = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [refreshKey]);
 
   const getDateLabel = (date: Date) => {
     if (isToday(date)) return 'Today';

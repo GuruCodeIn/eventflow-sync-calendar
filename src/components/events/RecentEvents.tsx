@@ -15,7 +15,11 @@ interface Event {
   created_at: string;
 }
 
-const RecentEvents = () => {
+interface RecentEventsProps {
+  refreshKey?: number;
+}
+
+const RecentEvents: React.FC<RecentEventsProps> = ({ refreshKey }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +40,7 @@ const RecentEvents = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [refreshKey]);
 
   const getEventStatus = (event: Event) => {
     const startDate = new Date(event.start_time);
