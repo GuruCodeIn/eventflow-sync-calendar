@@ -12,64 +12,94 @@ export interface Event {
 }
 
 export const getEvents = async (): Promise<Event[]> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
+  try {
+    // Get session instead of just user to ensure proper auth context
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      throw sessionError;
+    }
+    
+    if (!session?.user) {
+      console.error('No authenticated user found');
+      throw new Error('User not authenticated');
+    }
 
-  console.log('Fetching events for user:', user.id);
+    console.log('Fetching events for user:', session.user.id);
 
-  const { data, error } = await supabase
-    .from('events')
-    .select('*')
-    .or(`user_id.eq.${user.id},shared_with.cs.["${user.id}"]`)
-    .order('start_time', { ascending: true });
+    // Use a simpler query that relies on RLS policies
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('start_time', { ascending: true });
 
-  if (error) {
-    console.error('Error fetching events:', error);
+    if (error) {
+      console.error('Error fetching events:', error);
+      throw error;
+    }
+
+    console.log('Fetched events:', data?.length || 0, 'events');
+    console.log('Events data:', data);
+
+    return (data || []).map(event => ({
+      ...event,
+      shared_with: Array.isArray(event.shared_with) ? event.shared_with : []
+    }));
+  } catch (error) {
+    console.error('getEvents error:', error);
     throw error;
   }
-
-  console.log('Fetched events:', data?.length || 0, 'events');
-  console.log('Events data:', data);
-
-  return (data || []).map(event => ({
-    ...event,
-    shared_with: Array.isArray(event.shared_with) ? event.shared_with : []
-  }));
 };
 
 export const createEvent = async (event: Omit<Event, 'id' | 'user_id' | 'created_at'>): Promise<Event> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
+  try {
+    // Get session to ensure proper auth context
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      throw sessionError;
+    }
+    
+    if (!session?.user) {
+      console.error('No authenticated user found');
+      throw new Error('User not authenticated');
+    }
 
-  console.log('Creating event for user:', user.id);
-  console.log('Event data:', event);
+    console.log('Creating event for user:', session.user.id);
+    console.log('Event data:', event);
 
-  const { data, error } = await supabase
-    .from('events')
-    .insert([{
+    // Ensure we're using the correct user_id from session
+    const eventData = {
       ...event,
-      user_id: user.id,
-    }])
-    .select()
-    .single();
+      user_id: session.user.id,
+    };
 
-  if (error) {
-    console.error('Error creating event:', error);
+    console.log('Event data with user_id:', eventData);
+
+    const { data, error } = await supabase
+      .from('events')
+      .insert([eventData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating event:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      throw error;
+    }
+
+    console.log('Created event successfully:', data);
+
+    return {
+      ...data,
+      shared_with: Array.isArray(data.shared_with) ? data.shared_with : []
+    };
+  } catch (error) {
+    console.error('createEvent error:', error);
     throw error;
   }
-
-  console.log('Created event:', data);
-
-  return {
-    ...data,
-    shared_with: Array.isArray(data.shared_with) ? data.shared_with : []
-  };
 };
 
 export const updateEvent = async (id: string, event: Partial<Event>): Promise<Event> => {
