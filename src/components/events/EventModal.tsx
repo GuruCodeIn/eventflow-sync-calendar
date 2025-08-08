@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, MapPin, Palette, Repeat, Share2, UserPlus } from 'lucide-react';
-import { createEvent, shareEvent } from '../../api/events';
+import { createEvent, shareEvent } from '../../api/events-supabase';
 import toast from 'react-hot-toast';
 
 interface EventModalProps {
@@ -37,15 +37,17 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
 
     try {
       const event = await createEvent({
-        ...formData,
-        start: new Date(formData.start).toISOString(),
-        end: new Date(formData.end).toISOString()
+        title: formData.title,
+        description: formData.description,
+        start_time: new Date(formData.start).toISOString(),
+        end_time: new Date(formData.end).toISOString(),
+        shared_with: []
       });
       
       // Share with selected users
       for (const email of shareEmails) {
         try {
-          await shareEvent(event._id, email, sharePermission);
+          await shareEvent(event.id, email);
         } catch (error) {
           console.error('Failed to share with:', email, error);
         }

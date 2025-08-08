@@ -6,13 +6,14 @@ import WeekView from './WeekView';
 import DayView from './DayView';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
-  start: string;
-  end: string;
-  location?: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 interface CalendarGridProps {

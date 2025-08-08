@@ -3,13 +3,14 @@ import React from 'react';
 import { format, isSameDay, isToday } from 'date-fns';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
-  start: string;
-  end: string;
-  location?: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 interface DayViewProps {
@@ -23,7 +24,7 @@ const DayView: React.FC<DayViewProps> = ({ currentDate, events, onDateClick }) =
   
   const getEventsForHour = (hour: number) => {
     return events.filter(event => {
-      const eventStart = new Date(event.start);
+      const eventStart = new Date(event.start_time);
       return isSameDay(eventStart, currentDate) && eventStart.getHours() === hour;
     });
   };
@@ -67,17 +68,13 @@ const DayView: React.FC<DayViewProps> = ({ currentDate, events, onDateClick }) =
               >
                 {hourEvents.map((event) => (
                   <div
-                    key={event._id}
-                    className="p-3 rounded-lg mb-2 text-white shadow-sm transform transition-all duration-200 hover:scale-105 hover:shadow-md"
-                    style={{ backgroundColor: event.color }}
+                    key={event.id}
+                    className="p-3 rounded-lg mb-2 bg-blue-500 text-white shadow-sm transform transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
                     <div className="font-medium">{event.title}</div>
                     <div className="text-sm opacity-90 mt-1">
-                      {format(new Date(event.start), 'h:mm a')} - {format(new Date(event.end), 'h:mm a')}
+                      {format(new Date(event.start_time), 'h:mm a')} - {format(new Date(event.end_time), 'h:mm a')}
                     </div>
-                    {event.location && (
-                      <div className="text-sm opacity-80 mt-1">📍 {event.location}</div>
-                    )}
                     {event.description && (
                       <div className="text-sm opacity-90 mt-2">{event.description}</div>
                     )}

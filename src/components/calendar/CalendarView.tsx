@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react';
-import { getEvents } from '../../api/events';
+import { getEvents } from '../../api/events-supabase';
 import EventModal from '../events/EventModal';
 import CalendarGrid from './CalendarGrid';
 import ViewSelector from './ViewSelector';
@@ -10,13 +10,14 @@ import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns
 export type CalendarView = 'month' | 'week' | 'day';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
   description?: string;
-  start: string;
-  end: string;
-  location?: string;
-  color: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 const CalendarView = () => {

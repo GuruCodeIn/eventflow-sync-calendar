@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Share2, Users, Plus, Calendar, Eye, Edit3 } from 'lucide-react';
 import ShareEventModal from './ShareEventModal';
-import { getEvents } from '../../api/events';
+import { getEvents } from '../../api/events-supabase';
 
 interface SharedCalendar {
   id: string;
@@ -24,8 +24,8 @@ const SharedCalendars = () => {
       try {
         const events = await getEvents();
         
-        // Create mock shared calendars based on events that have sharedWith data
-        const sharedEvents = events.filter(event => event.sharedWith && event.sharedWith.length > 0);
+        // Create mock shared calendars based on events that have shared_with data
+        const sharedEvents = events.filter(event => event.shared_with && event.shared_with.length > 0);
         
         const calendars: SharedCalendar[] = [
           {

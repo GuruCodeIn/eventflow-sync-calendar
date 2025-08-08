@@ -3,11 +3,14 @@ import React from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 
 interface Event {
-  _id: string;
+  id: string;
   title: string;
-  start: string;
-  end: string;
-  color: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  user_id: string;
+  shared_with: any[];
+  created_at: string;
 }
 
 interface MonthViewProps {
@@ -26,7 +29,7 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, onDateClick 
 
   const getEventsForDay = (day: Date) => {
     return events.filter(event => {
-      const eventStart = new Date(event.start);
+      const eventStart = new Date(event.start_time);
       return isSameDay(eventStart, day);
     });
   };
@@ -74,9 +77,8 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, onDateClick 
             <div className="space-y-1">
               {dayEvents.slice(0, 3).map((event) => (
                 <div
-                  key={event._id}
-                  className="text-xs p-1 rounded truncate text-white font-medium transform transition-all duration-200 hover:scale-105"
-                  style={{ backgroundColor: event.color }}
+                  key={event.id}
+                  className="text-xs p-1 rounded truncate bg-blue-500 text-white font-medium transform transition-all duration-200 hover:scale-105"
                   title={event.title}
                 >
                   {event.title}
