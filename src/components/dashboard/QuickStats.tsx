@@ -11,7 +11,11 @@ interface Stats {
   todayEvents: number;
 }
 
-const QuickStats = () => {
+interface QuickStatsProps {
+  refreshKey?: number;
+}
+
+const QuickStats: React.FC<QuickStatsProps> = ({ refreshKey }) => {
   const [stats, setStats] = useState<Stats>({
     totalEvents: 0,
     upcomingEvents: 0,
@@ -53,7 +57,7 @@ const QuickStats = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [refreshKey]);
 
   const statItems = [
     {
