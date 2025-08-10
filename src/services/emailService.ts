@@ -1,12 +1,4 @@
-import emailjs from '@emailjs/browser';
-
-// EmailJS configuration
-const SERVICE_ID = 'service_249o3xl';
-const TEMPLATE_ID = 'template_r5dloqc';
-const PUBLIC_KEY = 'DCQE-TWIHeOdlaV8M';
-
-// Initialize EmailJS
-emailjs.init(PUBLIC_KEY);
+import { supabase } from '@/integrations/supabase/client';
 
 export interface EmailParams {
   to_email: string;
@@ -24,22 +16,28 @@ export interface EmailParams {
 
 export const sendEmail = async (params: EmailParams): Promise<void> => {
   try {
-    const templateParams = {
-      to_email: params.to_email,
-      to_name: params.to_name || params.to_email,
-      from_email: params.from_email,
-      from_name: params.from_name,
-      subject: params.subject,
-      message: params.message,
-      event_title: params.event_title || '',
-      event_date: params.event_date || '',
-      event_time: params.event_time || '',
-      event_location: params.event_location || '',
-      permission_type: params.permission_type || '',
-    };
+    const { data, error } = await supabase.functions.invoke('send-event-email', {
+      body: {
+        to_email: params.to_email,
+        to_name: params.to_name || params.to_email,
+        from_email: params.from_email,
+        from_name: params.from_name,
+        subject: params.subject,
+        message: params.message,
+        event_title: params.event_title || '',
+        event_date: params.event_date || '',
+        event_time: params.event_time || '',
+        event_location: params.event_location || '',
+        permission_type: params.permission_type || '',
+      }
+    });
 
-    await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
-    console.log('Email sent successfully');
+    if (error) {
+      console.error('Failed to send email:', error);
+      throw new Error('Failed to send email');
+    }
+    
+    console.log('Email sent successfully:', data);
   } catch (error) {
     console.error('Failed to send email:', error);
     throw new Error('Failed to send email');
@@ -83,8 +81,8 @@ export const sendWelcomeEmail = async (
 ): Promise<void> => {
   await sendEmail({
     to_email: userEmail,
-    from_email: userEmail, // Use user's email as from_email
-    from_name: userName,
+    from_email: 'guruprasadhm486@gmail.com', // Testing email
+    from_name: 'Calendar System',
     subject: 'Welcome to Calendar System!',
     message: `Welcome ${userName}! Your account has been successfully created. You can now start managing your events and sharing calendars.`,
   });
@@ -97,7 +95,7 @@ export const sendPasswordChangeEmail = async (
 ): Promise<void> => {
   await sendEmail({
     to_email: userEmail,
-    from_email: 'noreply@calendarsystem.com',
+    from_email: 'guruprasadhm486@gmail.com', // Testing email
     from_name: 'Calendar System',
     subject: 'Password Changed Successfully',
     message: `Hello ${userName}, your password has been successfully changed. If you didn't make this change, please contact support immediately.`,
