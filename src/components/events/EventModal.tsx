@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, MapPin, Palette, Repeat, Share2, UserPlus } from 'lucide-react';
 import { createEvent, shareEvent } from '../../api/events-supabase';
+import { sendEventShareEmail } from '@/services/emailService';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 interface EventModalProps {
@@ -15,6 +17,7 @@ const colors = [
 ];
 
 const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initialDate }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -44,12 +47,30 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         shared_with: []
       });
       
-      // Share with selected users
+      // Share with selected users and send emails
       for (const email of shareEmails) {
         try {
           await shareEvent(event.id, email);
+          
+          // Send email notification
+          if (user) {
+            await sendEventShareEmail(
+              {
+                title: event.title,
+                start: event.start_time,
+                end: event.end_time,
+                location: formData.location
+              },
+              email,
+              user.email || '',
+              user.user_metadata?.name || 'Calendar User',
+              sharePermission
+            );
+            console.log('Email sent successfully to:', email);
+          }
         } catch (error) {
           console.error('Failed to share with:', email, error);
+          toast.error(`Failed to share with ${email}`);
         }
       }
       
