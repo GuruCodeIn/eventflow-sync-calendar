@@ -1,8 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Try multiple possible secret names
+const apiKey = Deno.env.get("RESEND_API_KEY") || 
+               Deno.env.get("RESEND_API-KEY") || 
+               Deno.env.get("resend_api");
+
 console.log("Edge function called - send-event-email");
+console.log("Available env vars:", Object.keys(Deno.env.toObject()).filter(key => key.toLowerCase().includes('resend')));
+console.log("API Key found:", apiKey ? "YES" : "NO");
+
+if (!apiKey) {
+  console.error("No RESEND API key found in environment variables");
+}
+
+const resend = new Resend(apiKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
