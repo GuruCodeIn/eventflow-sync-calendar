@@ -1,7 +1,6 @@
-
 # 📅 Full-Stack Shared Calendar Application
 
-A modern, full-featured calendar application built with React, Node.js, and MongoDB. Features real-time collaboration, event sharing, and responsive design.
+A modern, full-featured calendar application built with React, TypeScript, and Supabase. Features real-time collaboration, event sharing, email notifications, and responsive design.
 
 ## 🚀 Features
 
@@ -11,58 +10,56 @@ A modern, full-featured calendar application built with React, Node.js, and Mong
 - **Responsive Design** - Works on desktop, tablet, and mobile
 - **Real-time Updates** with Socket.io
 - **Event Management** - Create, edit, delete, and share events
-- **User Authentication** with JWT
+- **User Authentication** with Supabase Auth
 - **Shared Calendars** with permission management
+- **Email Notifications** for event sharing
 
 ### Backend
-- **RESTful API** built with Express.js
-- **MongoDB** database with Mongoose ODM
-- **JWT Authentication** with bcrypt password hashing
+- **Supabase Backend** with PostgreSQL database
+- **Edge Functions** for server-side logic
+- **Row Level Security** for data protection
 - **Real-time Features** using Socket.io
-- **Input Validation** and error handling
-- **Rate Limiting** and security headers
-- **Docker Support** for easy deployment
+- **Email Service** with Resend integration
+- **File Storage** capabilities
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18, TypeScript, TailwindCSS, Socket.io Client
-- **Backend**: Node.js, Express.js, MongoDB, Socket.io
-- **Authentication**: JWT, bcrypt
-- **Deployment**: Docker, Docker Compose
-- **Development**: Vite, ESLint, Prettier
+- **Frontend**: React 18, TypeScript, TailwindCSS, Vite
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **Email**: Resend API
+- **Real-time**: Socket.io
+- **Styling**: TailwindCSS with custom design system
+- **Development**: Vite, ESLint, TypeScript
 
 ## 🏗️ Project Structure
 
 ```
-├── src/                    # React frontend
-│   ├── components/         # React components
-│   │   ├── auth/          # Authentication components
-│   │   ├── calendar/      # Calendar views
-│   │   ├── dashboard/     # Dashboard components
-│   │   ├── events/        # Event management
-│   │   ├── layout/        # Layout components
-│   │   └── shared/        # Shared calendar components
-│   ├── contexts/          # React contexts
-│   ├── api/              # API client functions
-│   └── pages/            # Main pages
-├── server/               # Node.js backend
-│   ├── src/
-│   │   ├── models/       # MongoDB models
-│   │   ├── routes/       # API routes
-│   │   ├── middleware/   # Custom middleware
-│   │   └── server.js     # Main server file
-│   └── package.json
-├── docker/               # Docker configuration
-├── docs/                 # Documentation
-└── docker-compose.yml    # Multi-container setup
+├── src/                      # React frontend
+│   ├── components/           # React components
+│   │   ├── auth/            # Authentication components
+│   │   ├── calendar/        # Calendar views
+│   │   ├── dashboard/       # Dashboard components
+│   │   ├── events/          # Event management
+│   │   ├── layout/          # Layout components
+│   │   ├── shared/          # Shared calendar components
+│   │   └── ui/              # Reusable UI components
+│   ├── contexts/            # React contexts
+│   ├── integrations/        # Supabase integration
+│   ├── services/            # Service layer
+│   └── pages/              # Main pages
+├── supabase/               # Supabase configuration
+│   ├── functions/          # Edge functions
+│   └── migrations/         # Database migrations
+├── public/                 # Static assets
+└── docs/                   # Documentation
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ and npm
-- MongoDB (or use Docker)
-- Git
+- Node.js 18+ and npm
+- Supabase account
+- Resend account (for email functionality)
 
 ### 1. Clone Repository
 ```bash
@@ -70,120 +67,55 @@ git clone <repository-url>
 cd calendar-app
 ```
 
-### 2. Environment Setup
+### 2. Supabase Setup
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Get your project URL and anon key
+3. Update `src/integrations/supabase/client.ts` with your credentials
 
-**Backend Environment:**
+### 3. Email Service Setup
+1. Sign up at [resend.com](https://resend.com)
+2. Verify your sending domain at [resend.com/domains](https://resend.com/domains)
+3. Create an API key at [resend.com/api-keys](https://resend.com/api-keys)
+4. Add the `RESEND_API_KEY` secret in your Supabase project settings
+
+### 4. Install Dependencies
 ```bash
-cd server
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-**Frontend Environment:**
-```bash
-# In root directory
-echo "REACT_APP_API_URL=http://localhost:5000" > .env.local
-```
-
-### 3. Install Dependencies
-
-**Backend:**
-```bash
-cd server
 npm install
 ```
 
-**Frontend:**
+### 5. Start Development Server
 ```bash
-# In root directory
-npm install
-```
-
-### 4. Start Development Servers
-
-**Option A: Manual Start**
-```bash
-# Terminal 1: Start backend
-cd server
-npm run dev
-
-# Terminal 2: Start frontend
 npm run dev
 ```
 
-**Option B: Docker Compose**
-```bash
-docker-compose up --build
-```
+### 6. Access Application
+- **Frontend**: http://localhost:5173
+- **Supabase Dashboard**: Your project dashboard URL
 
-### 5. Access Application
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000/api
-- **API Health**: http://localhost:5000/api/health
+## 📋 API Integration
 
-## 📋 API Endpoints
+### Supabase Functions
+- `send-event-email` - Sends email notifications for event sharing
 
-### Authentication
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
-- `PUT /api/auth/profile` - Update profile
-
-### Events
-- `GET /api/events` - Get user events
-- `POST /api/events` - Create new event
-- `GET /api/events/:id` - Get single event
-- `PUT /api/events/:id` - Update event
-- `DELETE /api/events/:id` - Delete event
-- `POST /api/events/:id/share` - Share event
-
-### Users
-- `GET /api/users/search` - Search users by email
-- `GET /api/users/profile` - Get user profile
+### Core Features
+- **Event Management**: Create, read, update, delete events
+- **User Authentication**: Sign up, login, profile management
+- **Event Sharing**: Share events with other users via email
+- **Real-time Updates**: Live synchronization across users
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-**Backend (.env):**
-```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/calendar-app
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:3000
+### Required Secrets (Supabase Dashboard)
+```
+RESEND_API_KEY=your_resend_api_key
 ```
 
-**Frontend (.env.local):**
-```env
-REACT_APP_API_URL=http://localhost:5000
-```
-
-## 🐳 Docker Deployment
-
-### Development
-```bash
-docker-compose up --build
-```
-
-### Production
-```bash
-docker-compose -f docker-compose.prod.yml up --build
-```
-
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd server
-npm test
-```
-
-### Frontend Tests
-```bash
-npm test
-```
+### Environment Setup
+The application uses Supabase for backend services:
+- Database: PostgreSQL with Row Level Security
+- Authentication: Built-in Supabase Auth
+- Storage: Supabase Storage (if needed)
+- Edge Functions: Serverless functions for email sending
 
 ## 📱 Features in Detail
 
@@ -196,7 +128,13 @@ npm test
 - Create events with title, description, date/time, location
 - Color-coded events for easy organization
 - Recurring events support
-- Event sharing with permission levels (view/edit)
+- Event sharing with email notifications
+
+### Email Notifications
+- Automatic email sending when events are shared
+- Beautiful HTML email templates
+- Event details included in emails
+- Permission-based sharing (view/edit)
 
 ### Real-time Features
 - Live event updates across all connected users
@@ -207,43 +145,64 @@ npm test
 - Responsive design for all screen sizes
 - Smooth animations and transitions
 - Intuitive drag-and-drop interface
-- Keyboard shortcuts for power users
+- Modern UI with shadcn/ui components
 
 ## 🔒 Security Features
 
-- JWT-based authentication
-- Password hashing with bcrypt
-- Rate limiting on API endpoints
+- Row Level Security (RLS) on all database tables
+- JWT-based authentication with Supabase
+- Secure API key management via Supabase secrets
 - Input validation and sanitization
-- CORS protection
-- Security headers with Helmet.js
+- CORS protection on edge functions
 
 ## 📈 Performance
 
-- Optimized database queries with indexes
+- Optimized database queries with proper indexing
 - Frontend code splitting and lazy loading
-- Image optimization and caching
-- Gzip compression
-- Connection pooling for database
+- Edge function optimization for fast email delivery
+- Responsive design with mobile-first approach
 
-## 🚀 Deployment Options
+## 🚀 Deployment
 
-### Netlify (Frontend)
-1. Build the frontend: `npm run build`
-2. Deploy `dist` folder to Netlify
-3. Configure environment variables
+### Frontend Deployment
+The frontend can be deployed to any static hosting service:
+- Vercel (recommended)
+- Netlify
+- Cloudflare Pages
 
-### Render/Fly.io (Backend)
-1. Push code to GitHub
-2. Connect to Render/Fly.io
-3. Configure environment variables
-4. Deploy with automatic builds
+### Backend Deployment
+Backend services are handled by Supabase:
+- Database: Automatically managed PostgreSQL
+- Edge Functions: Automatically deployed
+- Authentication: Managed service
+- File Storage: Managed service
 
-### Self-Hosted
-- Use Docker Compose for full-stack deployment
-- Configure reverse proxy with Nginx
-- Set up SSL certificates
-- Monitor with logging and analytics
+## 🧪 Testing
+
+### Email Functionality
+1. Create an event in the calendar
+2. Add email addresses to share the event
+3. Check that emails are sent successfully
+4. Monitor edge function logs for debugging
+
+### Troubleshooting Email Issues
+- Verify Resend API key is correctly set in Supabase secrets
+- Check edge function logs for error messages
+- Ensure sending domain is verified in Resend
+- Confirm recipient email addresses are valid
+
+## 📊 Monitoring
+
+### Edge Function Logs
+Monitor email sending in your Supabase dashboard:
+- Go to Edge Functions → send-event-email → Logs
+- Check for successful email sends and error messages
+
+### Database Monitoring
+Use Supabase's built-in monitoring for:
+- Query performance
+- Database usage
+- Authentication metrics
 
 ## 🤝 Contributing
 
@@ -259,21 +218,25 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 🆘 Support
 
-- **Documentation**: Check the `/docs` folder
+- **Supabase Dashboard**: Monitor your project health
+- **Edge Function Logs**: Debug email sending issues
 - **Issues**: Create GitHub issues for bugs
 - **Discussions**: Use GitHub discussions for questions
 
 ## 🎯 Roadmap
 
+- [x] Email notifications for event sharing
+- [x] Supabase backend integration
+- [x] Real-time event updates
 - [ ] Google Calendar integration
 - [ ] Mobile app (React Native)
 - [ ] Advanced recurring event patterns
 - [ ] Calendar import/export
-- [ ] Email notifications
 - [ ] Team workspace features
 - [ ] Advanced permissions system
 - [ ] Calendar themes and customization
+- [ ] SMS notifications
 
 ---
 
-**Built with ❤️ by the Calendar App Team**
+**Built with ❤️ using React, TypeScript, and Supabase**

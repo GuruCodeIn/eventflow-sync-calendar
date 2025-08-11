@@ -14,7 +14,7 @@ if (!apiKey) {
   console.error("No RESEND API key found in environment variables");
 }
 
-const resend = new Resend(apiKey);
+const resend = apiKey ? new Resend(apiKey) : null;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,6 +41,14 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    if (!resend) {
+      console.error("Resend client not initialized - API key missing");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const emailData: EmailRequest = await req.json();
 
     const htmlContent = `
