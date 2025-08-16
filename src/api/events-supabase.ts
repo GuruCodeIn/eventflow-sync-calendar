@@ -1,4 +1,5 @@
 import { supabase } from '../integrations/supabase/client';
+import { createNotification } from './notifications';
 
 export interface Event {
   id: string;
@@ -165,10 +166,10 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
     throw new Error('User not found');
   }
 
-  // Get the current event
+  // Get the current event details
   const { data: currentEvent, error: eventError } = await supabase
     .from('events')
-    .select('shared_with')
+    .select('shared_with, title')
     .eq('id', eventId)
     .eq('user_id', user.id)
     .single();
@@ -190,5 +191,20 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
   if (updateError) {
     console.error('Error sharing event:', updateError);
     throw updateError;
+  }
+
+  // Create notification for the shared user
+  try {
+    await createNotification(
+      targetUser.id,
+      user.id,
+      'event_share',
+      'Event Shared With You',
+      `"${currentEvent.title}" has been shared with you`,
+      eventId
+    );
+  } catch (notificationError) {
+    console.error('Failed to create notification:', notificationError);
+    // Don't fail the sharing if notification creation fails
   }
 };
