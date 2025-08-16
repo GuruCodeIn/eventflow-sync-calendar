@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Calendar, Home, Share2, User, LogOut, Menu, X } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -59,6 +60,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex md:items-center md:space-x-4">
+            <NotificationBell />
             <Link
               to="/profile"
               className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900 transition-colors duration-200 px-2 py-1 rounded-md hover:bg-gray-100"
@@ -75,7 +77,8 @@ const Navbar = () => {
             </button>
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <NotificationBell />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors duration-200"
