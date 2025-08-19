@@ -11,6 +11,7 @@ import SharedCalendars from './components/shared/SharedCalendars';
 import ProfilePage from './components/profile/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AuthPage from './components/auth/AuthPage';
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import Navbar from './components/layout/Navbar';
 import NotFound from "./pages/NotFound";
 import { Toaster as HotToaster } from 'react-hot-toast';
@@ -29,6 +30,7 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route
                   path="/"
                   element={

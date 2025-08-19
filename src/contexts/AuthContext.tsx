@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<{ requiresLogin: boolean }>;
   logout: () => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -110,12 +111,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Logout successful');
   };
 
+  const updatePassword = async (password: string) => {
+    console.log('Updating user password');
+    setLoading(true);
+    
+    const { error } = await supabase.auth.updateUser({
+      password: password
+    });
+    
+    if (error) {
+      console.error('Password update failed:', error);
+      throw error;
+    }
+    
+    setLoading(false);
+    console.log('Password updated successfully');
+  };
+
   const value = {
     user,
     session,
     login,
     signup,
     logout,
+    updatePassword,
     loading
   };
 
