@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Lock, Calendar, History, Settings, Save, Edit3 } from 'lucide-react';
+import { User, Mail, Lock, Calendar, History, Settings, Save, Edit3, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getEvents, deleteEvent } from '../../api/events-supabase';
+import { supabase } from '@/integrations/supabase/client';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { sendPasswordChangeEmail } from '@/services/emailService';
@@ -105,6 +106,38 @@ const ProfilePage = () => {
       } catch (error) {
         console.error('Failed to delete event:', error);
         toast.error('Failed to delete event');
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmMessage = `Are you sure you want to permanently delete your account?\n\nThis action will:\n• Delete all your events\n• Remove all your notifications\n• Permanently delete your profile\n• Allow you to sign up again with the same email\n\nThis action cannot be undone.`;
+    
+    if (window.confirm(confirmMessage)) {
+      const finalConfirm = window.confirm('This is your final warning. Are you absolutely sure you want to delete your account permanently?');
+      
+      if (finalConfirm) {
+        try {
+          // Call the database function to delete all user data
+          const { error } = await supabase.rpc('delete_user_completely');
+          
+          if (error) {
+            console.error('Error deleting account:', error);
+            toast.error('Failed to delete account. Please try again.');
+            return;
+          }
+
+          toast.success('Account deleted successfully. You can now sign up again with the same email.');
+          
+          // Redirect to auth page after successful deletion
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 2000);
+          
+        } catch (error) {
+          console.error('Error deleting account:', error);
+          toast.error('Failed to delete account. Please try again.');
+        }
       }
     }
   };
@@ -320,6 +353,34 @@ const ProfilePage = () => {
                   <p className="text-sm text-yellow-700 mt-1">
                     You will receive an email confirmation when your password is changed for security purposes.
                   </p>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-200">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-red-800 mb-3">Delete Account</h3>
+                  <p className="text-sm text-red-700 mb-4">
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </p>
+                  <div className="bg-red-100 border border-red-300 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-red-800 mb-2">This will permanently delete:</h4>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      <li>• All your events and calendar data</li>
+                      <li>• All notifications (sent and received)</li>
+                      <li>• Your user profile and account information</li>
+                      <li>• Your access to shared calendars</li>
+                    </ul>
+                    <p className="text-sm text-red-700 mt-3 font-medium">
+                      After deletion, you can sign up again with the same email address.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account Permanently
+                  </button>
                 </div>
               </div>
             </div>
