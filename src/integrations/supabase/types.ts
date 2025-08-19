@@ -120,6 +120,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_completely: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_by_email: {
         Args: { user_email: string }
         Returns: {
