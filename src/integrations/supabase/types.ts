@@ -10,126 +10,17 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      events: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          end_time: string
-          id: string
-          shared_with: Json | null
-          start_time: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          end_time: string
-          id?: string
-          shared_with?: Json | null
-          start_time: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          end_time?: string
-          id?: string
-          shared_with?: Json | null
-          start_time?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          event_id: string | null
-          from_user_id: string
-          id: string
-          message: string
-          read: boolean
-          title: string
-          type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          event_id?: string | null
-          from_user_id: string
-          id?: string
-          message: string
-          read?: boolean
-          title: string
-          type?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          event_id?: string | null
-          from_user_id?: string
-          id?: string
-          message?: string
-          read?: boolean
-          title?: string
-          type?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id: string
-          name: string
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      delete_user_completely: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      get_user_by_email: {
-        Args: { user_email: string }
-        Returns: {
-          user_id: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
