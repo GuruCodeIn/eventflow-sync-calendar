@@ -128,13 +128,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_user_completely: { Args: never; Returns: undefined }
-      get_user_by_email: {
-        Args: { user_email: string }
-        Returns: {
-          user_id: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
