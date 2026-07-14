@@ -157,7 +157,7 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
 
   // First, get the target user by email using private function (bypasses RLS)
   const { data: userData, error: userError } = await (supabase.rpc as any)(
-    'private.get_user_by_email',
+    'get_user_by_email',
     { user_email: userEmail }
   );
 
