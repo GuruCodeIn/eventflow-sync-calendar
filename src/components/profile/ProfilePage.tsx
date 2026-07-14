@@ -119,7 +119,7 @@ const ProfilePage = () => {
       if (finalConfirm) {
         try {
           // Call the database function to delete all user data
-          const { error } = await supabase.rpc('delete_user_completely');
+          const { error } = await (supabase.rpc as any)('private.delete_user_completely');
           
           if (error) {
             console.error('Error deleting account:', error);

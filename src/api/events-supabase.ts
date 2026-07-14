@@ -155,16 +155,21 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
     throw new Error('User not authenticated');
   }
 
-  // First, get the target user by email
-  const { data: targetUser, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', userEmail)
-    .single();
+  // First, get the target user by email using private function (bypasses RLS)
+  const { data: userData, error: userError } = await (supabase.rpc as any)(
+    'private.get_user_by_email',
+    { user_email: userEmail }
+  );
 
-  if (userError || !targetUser) {
+  if (userError) {
+    throw new Error(`Error finding user: ${userError.message}`);
+  }
+
+  if (!userData || userData.length === 0) {
     throw new Error('User not found');
   }
+
+  const targetUserId = userData[0].user_id as string;
 
   // Get the current event details
   const { data: currentEvent, error: eventError } = await supabase
@@ -180,7 +185,7 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
 
   // Add the user to shared_with array
   const currentSharedWith = Array.isArray(currentEvent.shared_with) ? currentEvent.shared_with : [];
-  const updatedSharedWith = [...currentSharedWith, targetUser.id];
+  const updatedSharedWith = [...currentSharedWith, targetUserId];
 
   const { error: updateError } = await supabase
     .from('events')
@@ -196,7 +201,7 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
   // Create notification for the shared user
   try {
     await createNotification(
-      targetUser.id,
+      targetUserId,
       user.id,
       'event_share',
       'Event Shared With You',
