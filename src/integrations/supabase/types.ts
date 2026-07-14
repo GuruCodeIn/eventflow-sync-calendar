@@ -14,13 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_time: string
+          id: string
+          shared_with: Json | null
+          start_time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          id?: string
+          shared_with?: Json | null
+          start_time: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          id?: string
+          shared_with?: Json | null
+          start_time?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          from_user_id: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          from_user_id: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          from_user_id?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_user_completely: { Args: never; Returns: undefined }
+      get_user_by_email: {
+        Args: { user_email: string }
+        Returns: {
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
