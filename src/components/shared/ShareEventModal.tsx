@@ -33,6 +33,11 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
     setLoading(true);
 
     try {
+      if (!eventId) {
+        toast.error('Please open a specific event to share it');
+        return;
+      }
+
       if (eventId) {
         // Share the event via API
         await shareEvent(eventId, email);
@@ -44,7 +49,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
         if (eventToShare) {
           // Send email notification
           try {
-            await sendEventShareEmail(
+            const emailSent = await sendEventShareEmail(
               {
                 title: eventToShare.title,
                 start: eventToShare.start_time,
@@ -56,6 +61,12 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
               user.email?.split('@')[0] || 'User',
               permission
             );
+
+            if (!emailSent) {
+              toast.success('Event shared in the app. Email sending is not configured yet.');
+              onClose();
+              return;
+            }
           } catch (emailError) {
             console.error('Failed to send share email:', emailError);
             // Continue without failing the whole operation

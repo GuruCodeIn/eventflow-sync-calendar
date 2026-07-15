@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, TrendingUp } from 'lucide-react';
 import { getEvents } from '../../api/events-supabase';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface Stats {
   totalEvents: number;
@@ -38,15 +37,13 @@ const QuickStats: React.FC<QuickStatsProps> = ({ refreshKey }) => {
           return eventDate >= today && eventDate < tomorrow;
         });
 
-        // Count shared events (events that have shared_with data)
-        const sharedEventsCount = events.filter(event => 
-          event.shared_with && event.shared_with.length > 0
-        ).length;
+        // Count real shared events instead of placeholder shared calendars.
+        const sharedEventsCount = events.filter(event => event.shared_with && event.shared_with.length > 0).length;
 
         setStats({
           totalEvents: events.length,
           upcomingEvents: upcomingEvents.length,
-          sharedCalendars: sharedEventsCount > 0 ? 3 : 0, // Mock shared calendar count
+          sharedCalendars: sharedEventsCount,
           todayEvents: todayEvents.length
         });
       } catch (error) {
