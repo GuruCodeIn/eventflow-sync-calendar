@@ -11,12 +11,12 @@ const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [key, setKey] = useState(0);
 
-  const handleEventCreated = () => {
+  const handleEventCreated = (message = 'Event created successfully!') => {
     setRefreshKey(prev => prev + 1);
     setShowEventModal(false);
     // Show success message here to avoid duplicates
     import('react-hot-toast').then(({ default: toast }) => {
-      toast.success('Event created successfully!');
+      toast.success(message);
     });
   };
 
