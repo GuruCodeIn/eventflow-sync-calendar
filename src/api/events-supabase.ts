@@ -12,6 +12,11 @@ export interface Event {
   created_at: string;
 }
 
+export interface SharedEvent extends Event {
+  isOwnedByCurrentUser: boolean;
+  isSharedWithCurrentUser: boolean;
+}
+
 export const getEvents = async (): Promise<Event[]> => {
   try {
     // Get session instead of just user to ensure proper auth context
@@ -155,61 +160,41 @@ export const shareEvent = async (eventId: string, userEmail: string): Promise<vo
     throw new Error('User not authenticated');
   }
 
-  // First, get the target user by email using private function (bypasses RLS)
-  const { data: userData, error: userError } = await (supabase.rpc as any)(
-    'get_user_by_email',
-    { user_email: userEmail }
-  );
+  const { error } = await supabase.rpc('share_event_with_user' as any, {
+    event_id: eventId,
+    recipient_email: userEmail.trim().toLowerCase(),
+  });
 
-  if (userError) {
-    throw new Error(`Error finding user: ${userError.message}`);
+  if (error) {
+    console.error('Error sharing event:', error);
+    throw new Error(error.message || 'Failed to share event');
+  }
+};
+
+export const getSharedEvents = async (): Promise<SharedEvent[]> => {
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw sessionError;
   }
 
-  if (!userData || userData.length === 0) {
-    throw new Error('User not found');
+  if (!session?.user) {
+    throw new Error('User not authenticated');
   }
 
-  const targetUserId = userData[0].user_id as string;
+  const events = await getEvents();
+  const currentUserId = session.user.id;
 
-  // Get the current event details
-  const { data: currentEvent, error: eventError } = await supabase
-    .from('events')
-    .select('shared_with, title')
-    .eq('id', eventId)
-    .eq('user_id', user.id)
-    .single();
+  return events
+    .map(event => {
+      const sharedWith = Array.isArray(event.shared_with) ? event.shared_with : [];
 
-  if (eventError || !currentEvent) {
-    throw new Error('Event not found or you do not have permission to share it');
-  }
-
-  // Add the user to shared_with array
-  const currentSharedWith = Array.isArray(currentEvent.shared_with) ? currentEvent.shared_with : [];
-  const updatedSharedWith = [...currentSharedWith, targetUserId];
-
-  const { error: updateError } = await supabase
-    .from('events')
-    .update({ shared_with: updatedSharedWith })
-    .eq('id', eventId)
-    .eq('user_id', user.id);
-
-  if (updateError) {
-    console.error('Error sharing event:', updateError);
-    throw updateError;
-  }
-
-  // Create notification for the shared user
-  try {
-    await createNotification(
-      targetUserId,
-      user.id,
-      'event_share',
-      'Event Shared With You',
-      `"${currentEvent.title}" has been shared with you`,
-      eventId
-    );
-  } catch (notificationError) {
-    console.error('Failed to create notification:', notificationError);
-    // Don't fail the sharing if notification creation fails
-  }
+      return {
+        ...event,
+        shared_with: sharedWith,
+        isOwnedByCurrentUser: event.user_id === currentUserId,
+        isSharedWithCurrentUser: event.user_id !== currentUserId,
+      };
+    })
+    .filter(event => event.isSharedWithCurrentUser || event.shared_with.length > 0);
 };
