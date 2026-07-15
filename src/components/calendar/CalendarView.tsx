@@ -79,13 +79,13 @@ const CalendarView = () => {
     setShowEventModal(true);
   };
 
-  const handleEventCreated = () => {
+  const handleEventCreated = (message = 'Event created successfully!') => {
     fetchEvents();
     setShowEventModal(false);
     setSelectedDate(null);
     // Show success message here to avoid duplicates
     import('react-hot-toast').then(({ default: toast }) => {
-      toast.success('Event created successfully!');
+      toast.success(message);
     });
   };
 

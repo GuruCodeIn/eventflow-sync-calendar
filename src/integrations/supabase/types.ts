@@ -134,6 +134,12 @@ export type Database = {
           user_id: string
         }[]
       }
+      share_event_with_user: {
+        Args: { event_id: string; recipient_email: string }
+        Returns: {
+          recipient_user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

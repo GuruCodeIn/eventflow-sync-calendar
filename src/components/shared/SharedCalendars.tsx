@@ -1,61 +1,41 @@
 
 import React, { useState, useEffect } from 'react';
-import { Share2, Users, Plus, Calendar, Eye, Edit3 } from 'lucide-react';
-import ShareEventModal from './ShareEventModal';
-import { getEvents } from '../../api/events-supabase';
+import { Share2, Users, Plus, Calendar, Eye, Edit3, Clock } from 'lucide-react';
+import { getSharedEvents } from '../../api/events-supabase';
+import { format } from 'date-fns';
 
 interface SharedCalendar {
   id: string;
   name: string;
   owner: string;
   participants: string[];
-  color: string;
+  colorClass: string;
   eventCount: number;
   permission: 'view' | 'edit';
+  startsAt: string;
+  isReceived: boolean;
 }
 
 const SharedCalendars = () => {
-  const [showShareModal, setShowShareModal] = useState(false);
   const [sharedCalendars, setSharedCalendars] = useState<SharedCalendar[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSharedCalendars = async () => {
       try {
-        const events = await getEvents();
-        
-        // Create mock shared calendars based on events that have shared_with data
-        const sharedEvents = events.filter(event => event.shared_with && event.shared_with.length > 0);
-        
-        const calendars: SharedCalendar[] = [
-          {
-            id: '1',
-            name: 'Team Events',
-            owner: 'john@example.com',
-            participants: ['alice@example.com', 'bob@example.com'],
-            color: '#3B82F6',
-            eventCount: sharedEvents.length || 12,
-            permission: 'edit'
-          },
-          {
-            id: '2',
-            name: 'Family Calendar',
-            owner: 'sarah@example.com',
-            participants: ['john@example.com', 'emily@example.com'],
-            color: '#10B981',
-            eventCount: Math.floor(sharedEvents.length / 2) || 8,
-            permission: 'view'
-          },
-          {
-            id: '3',
-            name: 'Project Meetings',
-            owner: 'demo@example.com',
-            participants: ['team@example.com', 'manager@example.com'],
-            color: '#F59E0B',
-            eventCount: Math.ceil(sharedEvents.length / 3) || 5,
-            permission: 'edit'
-          }
-        ];
+        const events = await getSharedEvents();
+
+        const calendars: SharedCalendar[] = events.map((event) => ({
+          id: event.id,
+          name: event.title,
+          owner: event.isSharedWithCurrentUser ? 'Shared with you' : 'You',
+          participants: event.shared_with.map((participant) => String(participant)),
+          colorClass: event.isSharedWithCurrentUser ? 'bg-emerald-500' : 'bg-blue-500',
+          eventCount: 1,
+          permission: event.isSharedWithCurrentUser ? 'view' : 'edit',
+          startsAt: event.start_time,
+          isReceived: event.isSharedWithCurrentUser,
+        }));
         
         setSharedCalendars(calendars);
       } catch (error) {
@@ -70,6 +50,10 @@ const SharedCalendars = () => {
 
   const handleViewCalendar = (calendar: SharedCalendar) => {
     // Navigate to calendar view filtered by this shared calendar
+    window.location.href = '/calendar';
+  };
+
+  const handleOpenCalendar = () => {
     window.location.href = '/calendar';
   };
 
@@ -104,15 +88,22 @@ const SharedCalendars = () => {
             <p className="text-gray-600">Manage calendars shared with you and share your own.</p>
           </div>
           <button
-            onClick={() => setShowShareModal(true)}
+            onClick={handleOpenCalendar}
             className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-indigo-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <Share2 className="h-5 w-5 mr-2" />
-            Share Calendar
+            Open Calendar
           </button>
         </div>
       </div>
 
+      {sharedCalendars.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+          <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No shared events yet</h3>
+          <p className="text-gray-500">Events shared with you, or events you share with others, will appear here.</p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sharedCalendars.map((calendar, index) => (
           <div 
@@ -124,8 +115,7 @@ const SharedCalendars = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div 
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: calendar.color }}
+                    className={`w-4 h-4 rounded-full ${calendar.colorClass}`}
                   ></div>
                   <h3 className="text-lg font-semibold text-gray-900">{calendar.name}</h3>
                 </div>
@@ -146,23 +136,33 @@ const SharedCalendars = () => {
                 </div>
 
                 <div>
+                  <span className="text-sm text-gray-500">Starts:</span>
+                  <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-gray-400" />
+                    {format(new Date(calendar.startsAt), 'MMM d, h:mm a')}
+                  </p>
+                </div>
+
+                <div>
                   <span className="text-sm text-gray-500">Participants:</span>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {calendar.participants.map((participant, i) => (
+                    {calendar.participants.length > 0 ? calendar.participants.map((participant, i) => (
                       <span 
                         key={i}
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
                       >
                         {participant}
                       </span>
-                    ))}
+                    )) : (
+                      <span className="text-sm text-gray-500">No recipients yet</span>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
                     <Users className="h-4 w-4" />
-                    <span>{calendar.participants.length + 1} members</span>
+                    <span>{calendar.isReceived ? 'Received share' : `${calendar.participants.length} shared`}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">
@@ -202,19 +202,14 @@ const SharedCalendars = () => {
               Start sharing events with your team or family
             </p>
             <button
-              onClick={() => setShowShareModal(true)}
+              onClick={handleOpenCalendar}
               className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
             >
-              Get Started
+              Open Calendar
             </button>
           </div>
         </div>
       </div>
-
-      {showShareModal && (
-        <ShareEventModal
-          onClose={() => setShowShareModal(false)}
-        />
       )}
     </div>
   );
