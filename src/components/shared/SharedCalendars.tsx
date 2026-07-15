@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Share2, Users, Plus, Calendar, Eye, Edit3, Clock } from 'lucide-react';
-import ShareEventModal from './ShareEventModal';
 import { getSharedEvents } from '../../api/events-supabase';
 import { format } from 'date-fns';
 
@@ -18,7 +17,6 @@ interface SharedCalendar {
 }
 
 const SharedCalendars = () => {
-  const [showShareModal, setShowShareModal] = useState(false);
   const [sharedCalendars, setSharedCalendars] = useState<SharedCalendar[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,6 +53,10 @@ const SharedCalendars = () => {
     window.location.href = '/calendar';
   };
 
+  const handleOpenCalendar = () => {
+    window.location.href = '/calendar';
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -86,11 +88,11 @@ const SharedCalendars = () => {
             <p className="text-gray-600">Manage calendars shared with you and share your own.</p>
           </div>
           <button
-            onClick={() => setShowShareModal(true)}
+            onClick={handleOpenCalendar}
             className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-indigo-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <Share2 className="h-5 w-5 mr-2" />
-            Share Calendar
+            Open Calendar
           </button>
         </div>
       </div>
@@ -200,20 +202,14 @@ const SharedCalendars = () => {
               Start sharing events with your team or family
             </p>
             <button
-              onClick={() => setShowShareModal(true)}
+              onClick={handleOpenCalendar}
               className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
             >
-              Get Started
+              Open Calendar
             </button>
           </div>
         </div>
       </div>
-      )}
-
-      {showShareModal && (
-        <ShareEventModal
-          onClose={() => setShowShareModal(false)}
-        />
       )}
     </div>
   );
