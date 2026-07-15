@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 interface EventModalProps {
   onClose: () => void;
-  onEventCreated: () => void;
+  onEventCreated: (message?: string) => void;
   initialDate?: Date;
 }
 
@@ -47,14 +47,19 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         shared_with: []
       });
       
+      let shareFailures = 0;
+      let emailFailures = 0;
+      let sharedCount = 0;
+
       // Share with selected users and send emails
       for (const email of shareEmails) {
         try {
           await shareEvent(event.id, email);
+          sharedCount += 1;
           
           // Send email notification
           if (user) {
-            await sendEventShareEmail(
+            const emailSent = await sendEventShareEmail(
               {
                 title: event.title,
                 start: event.start_time,
@@ -66,15 +71,29 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
               user.user_metadata?.name || 'Calendar User',
               sharePermission
             );
-            console.log('Email sent successfully to:', email);
+
+            if (emailSent) {
+              console.log('Email sent successfully to:', email);
+            } else {
+              emailFailures += 1;
+            }
           }
         } catch (error) {
+          shareFailures += 1;
           console.error('Failed to share with:', email, error);
           toast.error(`Failed to share with ${email}`);
         }
       }
       
-      onEventCreated(); // Remove toast from here to avoid double messages
+      const successMessage = shareEmails.length === 0
+        ? 'Event created successfully!'
+        : shareFailures > 0
+          ? `Event created, but ${shareFailures} share${shareFailures === 1 ? '' : 's'} failed.`
+          : emailFailures > 0
+            ? `Event created and shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'} in the app. Email sending is not configured yet.`
+            : `Event created, shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'}, and email sent.`;
+
+      onEventCreated(successMessage); // Remove toast from here to avoid double messages
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create event');
     } finally {
