@@ -74,7 +74,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
         }
       }
       
-      toast.success('Event shared successfully! Email notification sent.');
+      toast.success('Event shared successfully.');
       onClose();
     } catch (error) {
       console.error('Error sharing event:', error);
