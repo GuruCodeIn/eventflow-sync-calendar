@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'react-hot-toast';
 
 export interface EmailParams {
   to_email: string;
@@ -15,7 +14,7 @@ export interface EmailParams {
   permission_type?: string;
 }
 
-export const sendEmail = async (params: EmailParams): Promise<void> => {
+export const sendEmail = async (params: EmailParams): Promise<boolean> => {
   try {
     const { data, error } = await supabase.functions.invoke('send-event-email', {
       body: {
@@ -34,16 +33,15 @@ export const sendEmail = async (params: EmailParams): Promise<void> => {
     });
 
     if (error) {
-      console.warn('Email service error, using notification fallback:', error);
-      toast.success(`Event shared successfully! ${params.to_email} has been notified.`);
-      return;
+      console.warn('Email service error:', error);
+      return false;
     }
     
     console.log('Email sent successfully:', data);
-    toast.success('Event shared and email sent successfully!');
+    return true;
   } catch (error) {
-    console.warn('Email service error, using fallback notification:', error);
-    toast.success(`Event shared successfully! ${params.to_email} has been notified.`);
+    console.warn('Email service error:', error);
+    return false;
   }
 };
 
@@ -59,11 +57,11 @@ export const sendEventShareEmail = async (
   senderEmail: string,
   senderName: string,
   permission: 'view' | 'edit'
-): Promise<void> => {
+): Promise<boolean> => {
   const eventDate = new Date(eventDetails.start).toLocaleDateString();
   const eventTime = `${new Date(eventDetails.start).toLocaleTimeString()} - ${new Date(eventDetails.end).toLocaleTimeString()}`;
   
-  await sendEmail({
+  return sendEmail({
     to_email: recipientEmail,
     from_email: senderEmail,
     from_name: senderName,
@@ -81,8 +79,8 @@ export const sendEventShareEmail = async (
 export const sendWelcomeEmail = async (
   userEmail: string,
   userName: string
-): Promise<void> => {
-  await sendEmail({
+): Promise<boolean> => {
+  return sendEmail({
     to_email: userEmail,
     from_email: 'guruprasadhm486@gmail.com', // Testing email
     from_name: 'Calendar System',
@@ -95,8 +93,8 @@ export const sendWelcomeEmail = async (
 export const sendPasswordChangeEmail = async (
   userEmail: string,
   userName: string
-): Promise<void> => {
-  await sendEmail({
+): Promise<boolean> => {
+  return sendEmail({
     to_email: userEmail,
     from_email: 'guruprasadhm486@gmail.com', // Testing email
     from_name: 'Calendar System',
