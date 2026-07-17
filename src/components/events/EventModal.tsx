@@ -97,7 +97,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         }
       }
       
-      const successMessage = shareEmails.length === 0
+      const successMessage = emailsToShare.length === 0
         ? 'Event created successfully!'
         : shareFailures > 0
           ? `Event created, but ${shareFailures} share${shareFailures === 1 ? '' : 's'} failed.`
@@ -105,8 +105,9 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
             ? `Event created and shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'} in the app. Email could not be sent — check EmailJS configuration.`
             : `Event created, shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'}, and email sent.`;
 
-      onEventCreated(successMessage); // Remove toast from here to avoid double messages
+      onEventCreated(successMessage);
     } catch (error) {
+      console.error('[EventModal] handleSubmit error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create event');
     } finally {
       setLoading(false);
