@@ -21,39 +21,48 @@ let initialized = false;
 
 const ensureInitialized = () => {
   if (!initialized && PUBLIC_KEY) {
-    emailjs.init(PUBLIC_KEY);
+    emailjs.init({ publicKey: PUBLIC_KEY });
     initialized = true;
   }
 };
 
 export const sendEmailViaEmailJS = async (params: EmailJSParams): Promise<boolean> => {
+  if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
+    console.warn('EmailJS is not configured. Missing VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID or VITE_EMAILJS_PUBLIC_KEY.');
+    throw new Error('EmailJS is not configured');
+  }
+
+  ensureInitialized();
+
+  // Pass variables using EXACT names defined in the EmailJS template.
+  // Include common aliases (email, user_email) so the template's "To Email"
+  // field resolves regardless of which variable name the template uses.
+  const templateParams = {
+    to_email: params.to_email,
+    email: params.to_email,
+    user_email: params.to_email,
+    recipient: params.to_email,
+    reply_to: params.reply_to,
+    inviter_name: params.inviter_name,
+    event_title: params.event_title,
+    event_date: params.event_date,
+    event_time: params.event_time,
+    event_location: params.event_location,
+    permission_type: params.permission_type,
+    message: params.message,
+    event_link: params.event_link,
+  };
+
   try {
-    ensureInitialized();
-
-    if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
-      console.warn('EmailJS is not configured. Missing VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID or VITE_EMAILJS_PUBLIC_KEY.');
-      return false;
-    }
-
-    // Pass variables using EXACT names defined in the EmailJS template.
-    const templateParams = {
-      to_email: params.to_email,
-      reply_to: params.reply_to,
-      inviter_name: params.inviter_name,
-      event_title: params.event_title,
-      event_date: params.event_date,
-      event_time: params.event_time,
-      event_location: params.event_location,
-      permission_type: params.permission_type,
-      message: params.message,
-      event_link: params.event_link,
-    };
-
-    const result = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
+    const result = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, {
+      publicKey: PUBLIC_KEY,
+    });
     console.log('EmailJS send result:', result);
     return result.status === 200;
-  } catch (error) {
-    console.error('EmailJS send error:', error);
-    return false;
+  } catch (error: any) {
+    const detail = error?.text || error?.message || JSON.stringify(error);
+    console.error('EmailJS send error:', detail, error);
+    throw new Error(`EmailJS: ${detail}`);
   }
 };
+
