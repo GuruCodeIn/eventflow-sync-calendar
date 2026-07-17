@@ -39,6 +39,13 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
     e.preventDefault();
     setLoading(true);
 
+    // Auto-include a pending email that was typed but not added via the + button
+    const pending = shareEmail.trim().toLowerCase();
+    const emailsToShare = Array.from(new Set([
+      ...shareEmails.map(e => e.trim().toLowerCase()).filter(Boolean),
+      ...(pending && /^\S+@\S+\.\S+$/.test(pending) ? [pending] : []),
+    ]));
+
     try {
       const event = await createEvent({
         title: formData.title,
@@ -47,13 +54,15 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         end_time: new Date(formData.end).toISOString(),
         shared_with: []
       });
-      
+
       let shareFailures = 0;
       let emailFailures = 0;
       let sharedCount = 0;
 
+      console.log('[EventModal] Sharing event with:', emailsToShare);
+
       // Share with selected users and send emails
-      for (const email of shareEmails) {
+      for (const email of emailsToShare) {
         try {
           await shareEvent(event.id, email);
           sharedCount += 1;
