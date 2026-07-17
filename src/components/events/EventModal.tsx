@@ -39,6 +39,13 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
     e.preventDefault();
     setLoading(true);
 
+    // Auto-include a pending email that was typed but not added via the + button
+    const pending = shareEmail.trim().toLowerCase();
+    const emailsToShare = Array.from(new Set([
+      ...shareEmails.map(e => e.trim().toLowerCase()).filter(Boolean),
+      ...(pending && /^\S+@\S+\.\S+$/.test(pending) ? [pending] : []),
+    ]));
+
     try {
       const event = await createEvent({
         title: formData.title,
@@ -47,13 +54,15 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         end_time: new Date(formData.end).toISOString(),
         shared_with: []
       });
-      
+
       let shareFailures = 0;
       let emailFailures = 0;
       let sharedCount = 0;
 
+      console.log('[EventModal] Sharing event with:', emailsToShare);
+
       // Share with selected users and send emails
-      for (const email of shareEmails) {
+      for (const email of emailsToShare) {
         try {
           await shareEvent(event.id, email);
           sharedCount += 1;
@@ -88,7 +97,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         }
       }
       
-      const successMessage = shareEmails.length === 0
+      const successMessage = emailsToShare.length === 0
         ? 'Event created successfully!'
         : shareFailures > 0
           ? `Event created, but ${shareFailures} share${shareFailures === 1 ? '' : 's'} failed.`
@@ -96,8 +105,9 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
             ? `Event created and shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'} in the app. Email could not be sent — check EmailJS configuration.`
             : `Event created, shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'}, and email sent.`;
 
-      onEventCreated(successMessage); // Remove toast from here to avoid double messages
+      onEventCreated(successMessage);
     } catch (error) {
+      console.error('[EventModal] handleSubmit error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create event');
     } finally {
       setLoading(false);
