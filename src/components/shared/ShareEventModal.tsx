@@ -51,6 +51,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
           try {
             const emailSent = await sendEventShareEmail(
               {
+                id: eventToShare.id,
                 title: eventToShare.title,
                 start: eventToShare.start_time,
                 end: eventToShare.end_time,
@@ -58,7 +59,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
               },
               email,
               user.email || '',
-              user.email?.split('@')[0] || 'User',
+              user.user_metadata?.name || user.email?.split('@')[0] || 'User',
               permission
             );
 

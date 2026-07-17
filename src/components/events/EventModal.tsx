@@ -31,6 +31,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
   const [shareEmails, setShareEmails] = useState<string[]>([]);
   const [shareEmail, setShareEmail] = useState('');
   const [sharePermission, setSharePermission] = useState<'view' | 'edit'>('view');
+  const [invitationMessage, setInvitationMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'create' | 'share'>('create');
 
@@ -61,6 +62,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
           if (user) {
             const emailSent = await sendEventShareEmail(
               {
+                id: event.id,
                 title: event.title,
                 start: event.start_time,
                 end: event.end_time,
@@ -68,8 +70,9 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
               },
               email,
               user.email || '',
-              user.user_metadata?.name || 'Calendar User',
-              sharePermission
+              user.user_metadata?.name || user.email?.split('@')[0] || 'Calendar User',
+              sharePermission,
+              invitationMessage,
             );
 
             if (emailSent) {
@@ -320,6 +323,21 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
                       <option value="edit">Can edit</option>
                     </select>
                   </div>
+                </div>
+              )}
+
+              {shareEmails.length > 0 && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Invitation message (optional)
+                  </label>
+                  <textarea
+                    value={invitationMessage}
+                    onChange={(e) => setInvitationMessage(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Add a personal note to include in the email"
+                  />
                 </div>
               )}
             </div>

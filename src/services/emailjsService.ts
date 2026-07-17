@@ -2,16 +2,15 @@ import emailjs from '@emailjs/browser';
 
 export interface EmailJSParams {
   to_email: string;
-  to_name?: string;
-  from_email: string;
-  from_name: string;
-  subject: string;
+  reply_to: string;
+  inviter_name: string;
+  event_title: string;
+  event_date: string;
+  event_time: string;
+  event_location: string;
+  permission_type: string;
   message: string;
-  event_title?: string;
-  event_date?: string;
-  event_time?: string;
-  event_location?: string;
-  permission_type?: string;
+  event_link: string;
 }
 
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
@@ -36,18 +35,18 @@ export const sendEmailViaEmailJS = async (params: EmailJSParams): Promise<boolea
       return false;
     }
 
+    // Pass variables using EXACT names defined in the EmailJS template.
     const templateParams = {
       to_email: params.to_email,
-      to_name: params.to_name || params.to_email,
-      from_email: params.from_email,
-      from_name: params.from_name,
-      subject: params.subject,
+      reply_to: params.reply_to,
+      inviter_name: params.inviter_name,
+      event_title: params.event_title,
+      event_date: params.event_date,
+      event_time: params.event_time,
+      event_location: params.event_location,
+      permission_type: params.permission_type,
       message: params.message,
-      event_title: params.event_title || '',
-      event_date: params.event_date || '',
-      event_time: params.event_time || '',
-      event_location: params.event_location || '',
-      permission_type: params.permission_type || '',
+      event_link: params.event_link,
     };
 
     const result = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
