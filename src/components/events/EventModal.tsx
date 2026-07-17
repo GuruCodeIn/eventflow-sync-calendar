@@ -63,12 +63,20 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
 
       // Share with selected users and send emails
       for (const email of emailsToShare) {
+        // Step 1: share (creates in-app notification)
         try {
           await shareEvent(event.id, email);
           sharedCount += 1;
-          
-          // Send email notification
-          if (user) {
+        } catch (error) {
+          shareFailures += 1;
+          console.error('Failed to share with:', email, error);
+          toast.error(`Failed to share with ${email}`);
+          continue;
+        }
+
+        // Step 2: send email (independent of share success)
+        if (user) {
+          try {
             const emailSent = await sendEventShareEmail(
               {
                 id: event.id,
@@ -83,17 +91,17 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
               sharePermission,
               invitationMessage,
             );
-
             if (emailSent) {
               console.log('Email sent successfully to:', email);
             } else {
               emailFailures += 1;
             }
+          } catch (err) {
+            emailFailures += 1;
+            const msg = err instanceof Error ? err.message : String(err);
+            console.error('Email send failed for', email, msg);
+            toast.error(`Email to ${email} failed: ${msg}`);
           }
-        } catch (error) {
-          shareFailures += 1;
-          console.error('Failed to share with:', email, error);
-          toast.error(`Failed to share with ${email}`);
         }
       }
       
