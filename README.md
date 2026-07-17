@@ -37,7 +37,7 @@ A modern, full-featured calendar application built with React, TypeScript, and S
   - Authentication and user management
   - Edge Functions for serverless logic
   - Real-time subscriptions
-- **Resend** - Email delivery service
+- **EmailJS** - Client-side email delivery service
 - **Socket.io** - Real-time communication
 
 ### Development Tools
@@ -101,7 +101,6 @@ A modern, full-featured calendar application built with React, TypeScript, and S
 │       └── NotFound.tsx
 ├── supabase/
 │   ├── functions/             # Edge functions
-│   │   └── send-event-email/  # Email sending function
 │   └── config.toml            # Supabase configuration
 ├── public/                    # Static assets
 ├── server/                    # Legacy Node.js server (deprecated)
@@ -113,7 +112,7 @@ A modern, full-featured calendar application built with React, TypeScript, and S
 ### Prerequisites
 - Node.js 18+ and npm/yarn
 - Supabase account ([supabase.com](https://supabase.com))
-- Resend account for email functionality ([resend.com](https://resend.com))
+- EmailJS account for email functionality ([emailjs.com](https://www.emailjs.com))
 
 ### 1. Clone the Repository
 ```bash
@@ -129,12 +128,20 @@ npm install
 4. The database schema and RLS policies will be automatically created
 
 ### 3. Email Service Configuration
-1. Sign up at [resend.com](https://resend.com)
-2. **Important**: Verify your sending domain at [resend.com/domains](https://resend.com/domains)
-3. Create an API key at [resend.com/api-keys](https://resend.com/api-keys)
-4. Add the `RESEND_API_KEY` secret in your Supabase project:
-   - Go to Project Settings → Edge Functions → Secrets
-   - Add `RESEND_API_KEY` with your API key value
+1. Sign up at [emailjs.com](https://www.emailjs.com)
+2. Create an **Email Service** (e.g., Gmail) and note the **Service ID**
+3. Create an **Email Template** and note the **Template ID**
+4. Find your **Public Key** in Account → General
+5. Add these values to your `.env` file:
+   ```
+   VITE_EMAILJS_PUBLIC_KEY=your_public_key
+   VITE_EMAILJS_SERVICE_ID=your_service_id
+   VITE_EMAILJS_TEMPLATE_ID=your_template_id
+   ```
+6. Make sure your EmailJS template includes these variables:
+   - `{{to_email}}`, `{{to_name}}`, `{{from_email}}`, `{{from_name}}`
+   - `{{subject}}`, `{{message}}`
+   - `{{event_title}}`, `{{event_date}}`, `{{event_time}}`, `{{event_location}}`, `{{permission_type}}`
 
 ### 4. Start Development
 ```bash
@@ -172,9 +179,11 @@ npm run dev
 
 ## 🔧 Configuration
 
-### Required Environment Variables (Supabase Secrets)
+### Required Environment Variables
 ```
-RESEND_API_KEY=your_resend_api_key_here
+VITE_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
+VITE_EMAILJS_SERVICE_ID=your_emailjs_service_id
+VITE_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
 ```
 
 ### Supabase Configuration
@@ -185,26 +194,26 @@ RESEND_API_KEY=your_resend_api_key_here
 
 ## 📱 API Documentation
 
-### Supabase Edge Functions
+### Email Service
 
-#### `send-event-email`
-Sends email notifications when events are shared.
+Event-share emails are sent directly from the browser using the EmailJS SDK. No backend Edge Function is required.
 
-**Endpoint**: `/functions/v1/send-event-email`
-**Method**: POST
-**Headers**: 
-- `Authorization`: Bearer token
-- `Content-Type`: application/json
+**Service file**: `src/services/emailjsService.ts`
 
-**Request Body**:
+**Template variables sent to EmailJS**:
 ```json
 {
   "to_email": "user@example.com",
+  "to_name": "user@example.com",
+  "from_email": "sender@example.com",
+  "from_name": "Sender Name",
+  "subject": "Calendar Event Shared: Team Meeting",
+  "message": "Sender Name has shared a calendar event with you.",
   "event_title": "Team Meeting",
-  "event_description": "Weekly team sync",
-  "event_date": "2024-01-15",
-  "event_time": "10:00 AM",
-  "sender_name": "John Doe"
+  "event_date": "1/15/2024",
+  "event_time": "10:00 AM - 11:00 AM",
+  "event_location": "Conference Room A",
+  "permission_type": "view"
 }
 ```
 
@@ -227,10 +236,11 @@ Sends email notifications when events are shared.
 ### Debugging Common Issues
 
 #### Email Not Sending
-- Verify Resend API key is set in Supabase secrets
-- Check edge function logs: [Edge Functions → send-event-email → Logs](https://supabase.com/dashboard/project/stfbdqokdracgyguqzmo/functions/send-event-email/logs)
-- Ensure sending domain is verified in Resend dashboard
-- Confirm recipient email format is valid
+- Verify `VITE_EMAILJS_PUBLIC_KEY`, `VITE_EMAILJS_SERVICE_ID`, and `VITE_EMAILJS_TEMPLATE_ID` are set in your `.env` file
+- Check the browser console for EmailJS error details
+- Confirm the EmailJS service and template IDs match your EmailJS dashboard
+- Ensure the recipient email format is valid
+- Verify your EmailJS account has not exceeded its monthly send limit
 
 #### Authentication Issues
 - Check Supabase project settings
@@ -284,7 +294,7 @@ npm run lint
 - [x] Event sharing via email
 - [x] Real-time collaboration
 - [x] Responsive design
-- [x] Email notifications with Resend
+- [x] Email notifications with EmailJS
 - [x] Dashboard with analytics
 
 ### Planned Features
@@ -322,8 +332,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Helpful Links
 - [Supabase Dashboard](https://supabase.com/dashboard/project/stfbdqokdracgyguqzmo) - Monitor your project
-- [Edge Function Logs](https://supabase.com/dashboard/project/stfbdqokdracgyguqzmo/functions/send-event-email/logs) - Debug email issues
-- [Resend Dashboard](https://resend.com/domains) - Manage email settings
+- [EmailJS Dashboard](https://dashboard.emailjs.com/) - Manage email templates and services
 
 ### Getting Help
 - Create GitHub issues for bugs and feature requests
