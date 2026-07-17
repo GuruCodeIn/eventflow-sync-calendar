@@ -49,7 +49,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
         if (eventToShare) {
           // Send email notification
           try {
-            const emailSent = await sendEventShareEmail(
+            await sendEventShareEmail(
               {
                 id: eventToShare.id,
                 title: eventToShare.title,
@@ -62,17 +62,14 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
               user.user_metadata?.name || user.email?.split('@')[0] || 'User',
               permission
             );
-
-            if (!emailSent) {
-              toast.success('Event shared in the app. Email could not be sent — check EmailJS configuration.');
-              onClose();
-              return;
-            }
-          } catch (emailError) {
+          } catch (emailError: any) {
             console.error('Failed to send share email:', emailError);
-            // Continue without failing the whole operation
+            toast.error(`Shared in app, but email failed: ${emailError?.message || 'unknown error'}`);
+            onClose();
+            return;
           }
         }
+
       }
       
       toast.success('Event shared successfully.');
