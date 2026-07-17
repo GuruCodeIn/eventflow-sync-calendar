@@ -6,7 +6,7 @@ import { getEvents, deleteEvent } from '../../api/events-supabase';
 import { supabase } from '@/integrations/supabase/client';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import { sendPasswordChangeEmail } from '@/services/emailService';
+
 
 interface Event {
   id: string;
@@ -74,14 +74,7 @@ const ProfilePage = () => {
       // Simulate API call for password change
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Send password change notification email
-      try {
-        await sendPasswordChangeEmail(user.email, user.email?.split('@')[0] || 'User');
-      } catch (emailError) {
-        console.error('Failed to send password change email:', emailError);
-      }
-      
-      toast.success('Password changed successfully! Check your email for confirmation.');
+      toast.success('Password changed successfully!');
       setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       toast.error('Failed to change password');

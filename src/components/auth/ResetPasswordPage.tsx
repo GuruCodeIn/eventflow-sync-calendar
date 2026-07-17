@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff, Lock, CheckCircle } from 'lucide-react';
-import { sendPasswordChangeEmail } from '@/services/emailService';
+
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');
@@ -68,18 +68,6 @@ const ResetPasswordPage = () => {
         throw error;
       }
 
-      // Get current user info for email
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user?.email) {
-        // Send confirmation email
-        try {
-          await sendPasswordChangeEmail(user.email, user.user_metadata?.name || user.email);
-        } catch (emailError) {
-          console.error('Failed to send confirmation email:', emailError);
-          // Don't fail the whole process if email fails
-        }
-      }
 
       toast.success('Password updated successfully!');
       
