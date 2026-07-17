@@ -90,7 +90,7 @@ const EventModal: React.FC<EventModalProps> = ({ onClose, onEventCreated, initia
         : shareFailures > 0
           ? `Event created, but ${shareFailures} share${shareFailures === 1 ? '' : 's'} failed.`
           : emailFailures > 0
-            ? `Event created and shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'} in the app. Email sending is not configured yet.`
+            ? `Event created and shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'} in the app. Email could not be sent — check EmailJS configuration.`
             : `Event created, shared with ${sharedCount} user${sharedCount === 1 ? '' : 's'}, and email sent.`;
 
       onEventCreated(successMessage); // Remove toast from here to avoid double messages

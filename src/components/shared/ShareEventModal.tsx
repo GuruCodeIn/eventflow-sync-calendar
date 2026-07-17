@@ -63,7 +63,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
             );
 
             if (!emailSent) {
-              toast.success('Event shared in the app. Email sending is not configured yet.');
+              toast.success('Event shared in the app. Email could not be sent — check EmailJS configuration.');
               onClose();
               return;
             }
@@ -153,7 +153,7 @@ const ShareEventModal: React.FC<ShareEventModalProps> = ({ onClose, eventId }) =
           <div className="bg-blue-50 p-4 rounded-lg">
             <h4 className="text-sm font-medium text-blue-900 mb-1">What happens next?</h4>
             <p className="text-sm text-blue-700">
-              We'll send an invitation email to <strong>{email || 'the recipient'}</strong> with {permission} access to your calendar.
+              We'll share the event in the app and send an invitation email to <strong>{email || 'the recipient'}</strong> with {permission} access.
             </p>
           </div>
 

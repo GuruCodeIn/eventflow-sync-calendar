@@ -1,48 +1,9 @@
-import { supabase } from '@/integrations/supabase/client';
+import { sendEmailViaEmailJS, type EmailJSParams } from './emailjsService';
 
-export interface EmailParams {
-  to_email: string;
-  to_name?: string;
-  from_email: string;
-  from_name: string;
-  subject: string;
-  message: string;
-  event_title?: string;
-  event_date?: string;
-  event_time?: string;
-  event_location?: string;
-  permission_type?: string;
-}
+export interface EmailParams extends EmailJSParams {}
 
 export const sendEmail = async (params: EmailParams): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase.functions.invoke('send-event-email', {
-      body: {
-        to_email: params.to_email,
-        to_name: params.to_name || params.to_email,
-        from_email: params.from_email,
-        from_name: params.from_name,
-        subject: params.subject,
-        message: params.message,
-        event_title: params.event_title || '',
-        event_date: params.event_date || '',
-        event_time: params.event_time || '',
-        event_location: params.event_location || '',
-        permission_type: params.permission_type || '',
-      }
-    });
-
-    if (error) {
-      console.warn('Email service error:', error);
-      return false;
-    }
-    
-    console.log('Email sent successfully:', data);
-    return true;
-  } catch (error) {
-    console.warn('Email service error:', error);
-    return false;
-  }
+  return sendEmailViaEmailJS(params);
 };
 
 // Event sharing email
@@ -60,7 +21,7 @@ export const sendEventShareEmail = async (
 ): Promise<boolean> => {
   const eventDate = new Date(eventDetails.start).toLocaleDateString();
   const eventTime = `${new Date(eventDetails.start).toLocaleTimeString()} - ${new Date(eventDetails.end).toLocaleTimeString()}`;
-  
+
   return sendEmail({
     to_email: recipientEmail,
     from_email: senderEmail,
